@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "ghost-poster",
+    "slug": "ghost-poster",
+    "version": "1.0.0",
+    "scheme": "ghost-poster",
+    "platforms": ["android"],
+    "android": {
+      "package": "fr.gyozamancave.ghostposter",
+      "permissions": ["android.permission.READ_MEDIA_IMAGES"]
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Accès à la galerie pour insérer des images dans vos articles."
+        }
+      ]
+    ],
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
