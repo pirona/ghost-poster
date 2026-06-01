@@ -81,7 +81,7 @@ async function persistState(
 export const useInstanceStore = create<InstanceState & InstanceActions>((set, get) => ({
   instances: [],
   activeInstanceId: null,
-  isLoading: false,
+  isLoading: true,
   error: null,
 
   async loadInstances(): Promise<void> {

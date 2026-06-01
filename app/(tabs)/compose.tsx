@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -17,7 +17,6 @@ import {
   ActivityIndicator,
   useTheme,
 } from 'react-native-paper';
-import { useFocusEffect } from 'expo-router';
 
 import { usePostStore } from '../../src/store/postStore';
 import { usePostEditor } from '../../src/hooks/usePostEditor';
@@ -46,23 +45,6 @@ export default function ComposeScreen(): React.JSX.Element {
   const title = currentPost?.title ?? '';
   const content = currentPost?.markdownContent ?? '';
   const tags = currentPost?.tags ?? [];
-
-  // Sur focus : réinitialise si on arrive sur un post édité sans l'avoir modifié
-  // (évite que l'ancien post reste affiché quand on veut composer du nouveau)
-  useFocusEffect(
-    useCallback(() => {
-      if (isEditMode && !isDirty) {
-        resetCurrentPost();
-        setIsPreviewMode(false);
-        setTitleError(null);
-      }
-      return () => {
-        if (!isDirty) {
-          setIsPreviewMode(false);
-        }
-      };
-    }, [isDirty, isEditMode, resetCurrentPost]),
-  );
 
   function handleTitleChange(value: string): void {
     setTitle(value);
