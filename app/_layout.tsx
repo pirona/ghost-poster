@@ -6,8 +6,8 @@
  *              Aucune logique métier — uniquement la navigation et les providers.
  */
 
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -35,10 +35,9 @@ const theme = {
 
 export default function RootLayout(): React.JSX.Element {
   const loadInstances = useInstanceStore((s) => s.loadInstances);
-  const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    loadInstances().finally(() => setAppReady(true));
+    loadInstances();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -47,23 +46,17 @@ export default function RootLayout(): React.JSX.Element {
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
           <StatusBar style="auto" />
-          {!appReady ? (
-            <View style={styles.splash}>
-              <ActivityIndicator size="large" color="#1565C0" />
-            </View>
-          ) : (
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="settings"
-                options={{
-                  title: 'Instances Ghost',
-                  headerBackTitle: 'Retour',
-                }}
-              />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            </Stack>
-          )}
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="settings"
+              options={{
+                title: 'Instances Ghost',
+                headerBackTitle: 'Retour',
+              }}
+            />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
         </PaperProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
@@ -77,11 +70,5 @@ export default function RootLayout(): React.JSX.Element {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  splash: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FAFAFA',
   },
 });
