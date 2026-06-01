@@ -11,19 +11,21 @@ import TurndownService from 'turndown';
 import { marked } from 'marked';
 
 // ---------------------------------------------------------------------------
-// Configuration — initialisée une seule fois au chargement du module
+// Configuration — initialisée à la demande (lazy singleton)
 // ---------------------------------------------------------------------------
 
-const turndownService = new TurndownService({
-  headingStyle: 'atx',
-  codeBlockStyle: 'fenced',
-  bulletListMarker: '-',
-});
+let _turndownService: TurndownService | null = null;
 
-marked.use({
-  gfm: true,
-  breaks: true,
-});
+function getTurndownService(): TurndownService {
+  if (!_turndownService) {
+    _turndownService = new TurndownService({
+      headingStyle: 'atx',
+      codeBlockStyle: 'fenced',
+      bulletListMarker: '-',
+    });
+  }
+  return _turndownService;
+}
 
 // ---------------------------------------------------------------------------
 // Fonctions exportées
@@ -39,7 +41,7 @@ marked.use({
 export function htmlToMarkdown(html: string | null | undefined): string {
   if (!html) return '';
   try {
-    return turndownService.turndown(html);
+    return getTurndownService().turndown(html);
   } catch (error) {
     console.error('Erreur de conversion HTML → Markdown:', error instanceof Error ? error.message : error);
     return html;
@@ -56,8 +58,7 @@ export function htmlToMarkdown(html: string | null | undefined): string {
 export function markdownToHtml(markdown: string): string {
   if (!markdown) return '';
   try {
-    // marked.parse retourne string en mode synchrone (async: false par défaut)
-    return marked.parse(markdown) as string;
+    return marked.parse(markdown, { async: false, gfm: true, breaks: true });
   } catch (error) {
     console.error('Erreur de conversion Markdown → HTML:', error instanceof Error ? error.message : error);
     return markdown;

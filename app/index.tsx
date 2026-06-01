@@ -6,6 +6,7 @@
  *              Aucune logique métier — uniquement le routage conditionnel.
  */
 
+import React from 'react';
 import { Redirect } from 'expo-router';
 
 import { useInstanceStore } from '../src/store/instanceStore';

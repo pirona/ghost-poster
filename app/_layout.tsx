@@ -33,7 +33,7 @@ const theme = {
 // Layout
 // ---------------------------------------------------------------------------
 
-export default function RootLayout(): React.JSX.Element | null {
+export default function RootLayout(): React.JSX.Element {
   const loadInstances = useInstanceStore((s) => s.loadInstances);
   const [appReady, setAppReady] = useState(false);
 
@@ -42,30 +42,28 @@ export default function RootLayout(): React.JSX.Element | null {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!appReady) {
-    return (
-      <View style={styles.splash}>
-        <ActivityIndicator size="large" color="#1565C0" />
-      </View>
-    );
-  }
-
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
           <StatusBar style="auto" />
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="settings"
-              options={{
-                title: 'Instances Ghost',
-                headerBackTitle: 'Retour',
-              }}
-            />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          </Stack>
+          {!appReady ? (
+            <View style={styles.splash}>
+              <ActivityIndicator size="large" color="#1565C0" />
+            </View>
+          ) : (
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="settings"
+                options={{
+                  title: 'Instances Ghost',
+                  headerBackTitle: 'Retour',
+                }}
+              />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+          )}
         </PaperProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
