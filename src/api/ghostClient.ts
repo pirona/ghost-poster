@@ -65,7 +65,7 @@ client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   }
 
   config.baseURL = activeInstance.url;
-  const token = await generateGhostJwt(activeInstance.apiKey);
+  const token = generateGhostJwt(activeInstance.apiKey);
   config.headers.set('Authorization', `Ghost ${token}`);
 
   return config;
@@ -217,7 +217,7 @@ export async function uploadImage(localUri: string): Promise<string> {
  * @throws GhostApiError avec le message approprié si la connexion échoue
  */
 export async function testGhostConnection(baseUrl: string, apiKey: string): Promise<GhostSite> {
-  const token = await generateGhostJwt(apiKey);
+  const token = generateGhostJwt(apiKey);
   const response = await axios.get<{ site: GhostSite }>(`${baseUrl}/ghost/api/admin/site/`, {
     headers: {
       Authorization: `Ghost ${token}`,
