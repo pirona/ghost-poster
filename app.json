@@ -4,10 +4,15 @@
     "slug": "ghost-poster",
     "version": "1.0.0",
     "scheme": "ghost-poster",
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "android": {
       "package": "fr.gyozamancave.ghostposter",
-      "permissions": ["android.permission.READ_MEDIA_IMAGES"]
+      "permissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-secure-store",
@@ -17,10 +22,21 @@
         {
           "photosPermission": "Accès à la galerie pour insérer des images dans vos articles."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-asset"
     ],
     "web": {
       "bundler": "metro"
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "3199cba5-5119-4fd1-91d4-01779c6cde12"
+      }
+    },
+    "owner": "billisdead"
   }
 }
