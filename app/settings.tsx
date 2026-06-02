@@ -231,7 +231,15 @@ export default function SettingsScreen(): React.JSX.Element {
         <View style={styles.bottomPad} />
       </ScrollView>
 
-      <FAB icon="plus" style={[styles.fab, { backgroundColor: colors.primary }]} onPress={openModal} />
+      <FAB
+        icon={({ size, color }) => (
+          <Text style={{ fontSize: size + 4, color, fontWeight: '900', textAlign: 'center', lineHeight: size + 4, includeFontPadding: false }}>
+            +
+          </Text>
+        )}
+        style={[styles.fab, { backgroundColor: colors.primary }]}
+        onPress={openModal}
+      />
 
       <Portal>
         <Modal

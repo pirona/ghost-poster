@@ -32,7 +32,13 @@ export default function RootLayout(): React.JSX.Element {
       <SafeAreaProvider>
         <PaperProvider theme={theme}>
           <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-          <Stack>
+          <Stack
+            screenOptions={{
+              headerStyle: { backgroundColor: theme.colors.surface },
+              headerTintColor: theme.colors.onSurface,
+              headerShadowVisible: false,
+            }}
+          >
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen
               name="settings"
