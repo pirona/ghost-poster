@@ -38,6 +38,8 @@ export interface CurrentPostState {
   title: string;
   markdownContent: string;
   tags: string[];
+  /** URL de l'image à la une — null si aucune, modifiable indépendamment du contenu. */
+  featureImage: string | null;
   /** updated_at Ghost original — obligatoire pour les requêtes PUT (optimistic lock). */
   originalUpdatedAt?: string;
   /** Statut au moment du chargement — détermine les actions disponibles dans l'éditeur. */
@@ -63,6 +65,7 @@ interface PostActions {
   setTitle(title: string): void;
   setMarkdownContent(content: string): void;
   setTags(tags: string[]): void;
+  setFeatureImage(url: string | null): void;
   /** Charge un post de la liste dans l'éditeur (conversion HTML → Markdown). */
   loadPostForEditing(post: GhostPost): void;
   /** Réinitialise l'éditeur pour une nouvelle création. */
@@ -103,7 +106,7 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
   setTitle(title: string): void {
     const current = get().currentPost;
     if (!current) {
-      set({ currentPost: { title, markdownContent: '', tags: [], isDirty: true } });
+      set({ currentPost: { title, markdownContent: '', tags: [], featureImage: null, isDirty: true } });
       return;
     }
     set({ currentPost: { ...current, title, isDirty: true } });
@@ -112,7 +115,7 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
   setMarkdownContent(content: string): void {
     const current = get().currentPost;
     if (!current) {
-      set({ currentPost: { title: '', markdownContent: content, tags: [], isDirty: true } });
+      set({ currentPost: { title: '', markdownContent: content, tags: [], featureImage: null, isDirty: true } });
       return;
     }
     set({ currentPost: { ...current, markdownContent: content, isDirty: true } });
@@ -121,10 +124,19 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
   setTags(tags: string[]): void {
     const current = get().currentPost;
     if (!current) {
-      set({ currentPost: { title: '', markdownContent: '', tags, isDirty: true } });
+      set({ currentPost: { title: '', markdownContent: '', tags, featureImage: null, isDirty: true } });
       return;
     }
     set({ currentPost: { ...current, tags, isDirty: true } });
+  },
+
+  setFeatureImage(url: string | null): void {
+    const current = get().currentPost;
+    if (!current) {
+      set({ currentPost: { title: '', markdownContent: '', tags: [], featureImage: url, isDirty: true } });
+      return;
+    }
+    set({ currentPost: { ...current, featureImage: url, isDirty: true } });
   },
 
   loadPostForEditing(post: GhostPost): void {
@@ -138,6 +150,7 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
         title: post.title,
         markdownContent,
         tags,
+        featureImage: post.feature_image,
         originalUpdatedAt: post.updated_at,
         originalStatus,
         isDirty: false,
@@ -232,6 +245,7 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
               html,
               status,
               tags,
+              feature_image: current.featureImage,
               updated_at: current.originalUpdatedAt,
             },
           ],
@@ -239,7 +253,7 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
       } else {
         // Création
         savedPost = await createPost({
-          posts: [{ title: current.title, html, status, tags }],
+          posts: [{ title: current.title, html, status, tags, feature_image: current.featureImage }],
         });
       }
 
@@ -249,6 +263,7 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
         currentPost: {
           ...current,
           ghostId: savedPost.id,
+          featureImage: savedPost.feature_image,
           originalUpdatedAt: savedPost.updated_at,
           originalStatus: savedPost.status === 'scheduled' ? 'published' : savedPost.status,
           isDirty: false,

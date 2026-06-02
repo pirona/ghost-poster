@@ -49,6 +49,8 @@ export interface GhostPost {
   lexical: string | null;
   status: 'draft' | 'published' | 'scheduled';
   tags: GhostTag[];
+  /** URL de l'image à la une — null si aucune image définie. */
+  feature_image: string | null;
   /** ISO 8601 — obligatoire dans les requêtes PUT (optimistic lock). */
   updated_at: string;
   published_at: string | null;
@@ -86,6 +88,7 @@ export interface CreatePostPayload {
     html: string;
     status: 'draft' | 'published';
     tags?: Array<{ name: string }>;
+    feature_image?: string | null;
   }>;
 }
 
@@ -95,6 +98,7 @@ export interface UpdatePostPayload {
     html: string;
     status: 'draft' | 'published';
     tags?: Array<{ name: string }>;
+    feature_image?: string | null;
     /** OBLIGATOIRE — Ghost rejette le PUT en 409 si ce champ est absent ou périmé. */
     updated_at: string;
   }>;

@@ -23,6 +23,7 @@ import { usePostEditor } from '../../src/hooks/usePostEditor';
 import { TagChipList } from '../../src/components/TagChipList';
 import { MarkdownPreview } from '../../src/components/MarkdownPreview';
 import { ImagePickerButton } from '../../src/components/ImagePickerButton';
+import { FeatureImagePicker } from '../../src/components/FeatureImagePicker';
 
 export default function ComposeScreen(): React.JSX.Element {
   const {
@@ -139,6 +140,8 @@ export default function ComposeScreen(): React.JSX.Element {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.editorContent}
         >
+          <FeatureImagePicker disabled={isSaving} />
+
           <TextInput
             label="Titre"
             value={title}
