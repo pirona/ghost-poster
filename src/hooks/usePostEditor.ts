@@ -95,7 +95,7 @@ export function usePostEditor() {
       try {
         await saveCurrentPost(status);
         resetCurrentPost();
-        router.replace('/(tabs)/posts');
+        router.replace('/(drawer)/posts');
         return true;
       } catch {
         // L'erreur est déjà stockée dans postStore.error et loggée dans le store

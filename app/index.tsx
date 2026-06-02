@@ -22,7 +22,7 @@ export default function Index(): React.JSX.Element {
     return <Redirect href="/settings" />;
   }
 
-  return <Redirect href="/(tabs)/posts" />;
+  return <Redirect href="/(drawer)/posts" />;
 }
 
 const styles = StyleSheet.create({

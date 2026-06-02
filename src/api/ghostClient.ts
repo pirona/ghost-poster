@@ -127,6 +127,7 @@ export async function getPosts(page: number, filter?: PostFilter): Promise<Ghost
       limit: 15,
       filter: statusFilter,
       include: 'tags',
+      formats: 'html',
       order: 'updated_at desc',
     },
   });

@@ -40,7 +40,7 @@ export default function PostsScreen(): React.JSX.Element {
 
   function handlePostPress(post: GhostPost): void {
     loadPostForEditing(post);
-    router.navigate('/(tabs)/compose');
+    router.navigate('/(drawer)/compose');
   }
 
   async function handleDeletePost(id: string): Promise<void> {

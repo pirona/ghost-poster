@@ -36,7 +36,7 @@ export default function RootLayout(): React.JSX.Element {
                 headerBackTitle: 'Retour',
               }}
             />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
           </Stack>
         </PaperProvider>
       </SafeAreaProvider>
