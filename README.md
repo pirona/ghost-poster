@@ -106,4 +106,4 @@ This is not commercial software. It's a tool I built for my own use, published b
 
 ## License
 
-MIT
+GPL-3.0 — see [LICENSE](LICENSE)
