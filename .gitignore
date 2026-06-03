@@ -1,5 +1,33 @@
-node_modules/
-dist/
+# Expo
 .expo/
-*.log
+dist/
+web-build/
+
+# Node
+node_modules/
+
+# EAS
+*.ipa
+*.apk
+*.aab
+
+# Secrets — never commit
+.env
+.env.local
+*.pem
+google-services.json
+GoogleService-Info.plist
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# Generated
 android/
+
+# Logs
+*.log

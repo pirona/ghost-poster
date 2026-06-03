@@ -1,159 +1,108 @@
-# Ghost Poster
+# ghost-poster
 
-> **Who ya gonna post?** — A mobile client for [Ghost CMS](https://ghost.org), built for Android with Expo / React Native.
+**An Android app to publish to your self-hosted Ghost instance from your phone.**
 
-Ghost Poster lets you write, edit and publish articles on your Ghost blog directly from your phone. No browser, no laptop — draft in Markdown, preview in-app, and hit publish from anywhere.
-
----
-
-## Features
-
-- **Write in Markdown** — full Markdown editor with live HTML preview via WebView
-- **Draft / Publish / Depublish** — full post lifecycle from your phone
-- **Multi-instance** — manage several Ghost blogs in one app, switch with a tap
-- **Secure by design** — Admin API keys stored in the device secure enclave (Expo SecureStore), JWT generated on-device with `@noble/hashes`, no third-party auth server
-- **Dark mode** — follows system preference or manual override (light / auto / dark)
-- **Tag management** — add and remove tags inline in the editor
-- **Image upload** — pick from gallery, upload to Ghost, insert Markdown link automatically
-- **Infinite scroll** — paginated post list with pull-to-refresh
-- **Filter by status** — view all posts, drafts only, or published only
-- **No cloud sync** — your credentials never leave your device
+Full post lifecycle — Markdown editing, live preview, image upload, draft and published post management, multi-instance support — without ever opening the Ghost admin panel.
 
 ---
 
-## Screenshots
+## What it does
 
-> Coming soon.
+- Write posts in Markdown with real-time rendered preview
+- Publish, unpublish, save as draft
+- Upload images from your gallery
+- Manage multiple Ghost instances from one place
+- Store API keys securely (Android Keystore via expo-secure-store, never in plaintext)
+
+What it doesn't do: access the Ghost admin panel, manage members, newsletters, or instance settings. This is a mobile publishing tool, not an embedded admin interface.
+
+---
+
+## Stack
+
+Expo SDK 52 · React Native Paper · Zustand · Axios · jose · expo-secure-store · turndown · marked · expo-web-view · expo-image-picker · TypeScript strict
 
 ---
 
 ## Installation
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org) ≥ 18
-- [Expo CLI](https://docs.expo.dev/get-started/installation/) (`npm install -g expo`)
-- [EAS CLI](https://docs.expo.dev/eas-update/getting-started/) (`npm install -g eas-cli`) — for builds
-- A Ghost instance with an **Admin API key** (Ghost Admin → Settings → Integrations → Add custom integration)
-
-### Run locally (Expo Go / development build)
-
 ```bash
 git clone https://github.com/billisdead/ghost-poster.git
 cd ghost-poster
 npm install
-npx expo start
+npx expo run:android
 ```
 
-Scan the QR code with **Expo Go** (Android) or run on an emulator.
+Requirements: Node.js 20+, Android Studio or a physical device in developer mode.
 
-> Note: `expo-secure-store` and `expo-image-picker` require a [development build](https://docs.expo.dev/develop/development-builds/introduction/) — Expo Go will warn about these on first launch.
-
-### Build APK (EAS)
+To build a test APK:
 
 ```bash
-eas build --profile preview --platform android
+eas build --platform android --profile preview
 ```
 
-This produces a standalone APK installable on any Android device.
+## Ghost configuration
 
-### Build production AAB (Play Store)
+Open the app, go to Settings, and add an instance:
 
-```bash
-eas build --profile production --platform android
-```
+1. Enter a display name, your Ghost instance URL, and an Admin API key
+2. The key is found in Ghost Admin → Settings → Integrations → Add custom integration
+3. The app tests the connection before saving
+
+The key is stored in the Android Keystore via `expo-secure-store`. It never appears in any log, environment variable, or plaintext file.
 
 ---
 
-## Update
+## On the code and how it was built
 
-```bash
-git pull
-npm install          # in case dependencies changed
-npx expo start       # or rebuild with eas build
-```
+This app was built with **Claude Code**, Anthropic's agentic coding interface, with architecture and design decisions worked out upfront in **Claude claude.ai**.
 
-There is no OTA update mechanism — each new version requires a fresh build.
+I'm a Linux systems engineer by trade — Kubernetes, Ansible, infrastructure, security. Not a mobile developer. I had never written a line of React Native before this project.
 
----
+What Claude Code did: generate the entire codebase from detailed prompts I wrote, iterate on bugs, and propose fixes.
 
-## Architecture
+What I did:
 
-```
-ghost-poster/
-├── app/
-│   ├── _layout.tsx          # Root layout: PaperProvider, theme, font loading
-│   ├── index.tsx            # Entry: redirect to /settings or /(drawer)/posts
-│   ├── settings.tsx         # Ghost instance manager + app preferences
-│   └── (drawer)/
-│       ├── _layout.tsx      # Drawer navigator (slide), header theming
-│       ├── posts.tsx        # Post list (filter, infinite scroll, swipe-delete)
-│       └── compose.tsx      # Markdown editor + preview + publish actions
-├── src/
-│   ├── api/
-│   │   ├── ghostClient.ts   # Ghost Admin API v5 calls (CRUD posts, upload)
-│   │   ├── ghostJwt.ts      # JWT generation with @noble/hashes (Hermes-compatible)
-│   │   └── ghostTypes.ts    # TypeScript types for Ghost API responses
-│   ├── components/
-│   │   ├── InstanceListItem.tsx
-│   │   ├── PostListItem.tsx
-│   │   ├── TagChipList.tsx
-│   │   ├── MarkdownPreview.tsx  # WebView-based HTML preview
-│   │   └── ImagePickerButton.tsx
-│   ├── hooks/
-│   │   ├── useInstances.ts  # Instance CRUD + validation + connection test
-│   │   ├── usePostEditor.ts # Editor state, dirty-check, navigation guard
-│   │   └── useSettingsStore.ts
-│   ├── store/
-│   │   ├── instanceStore.ts # Zustand: multi-instance list, active instance
-│   │   ├── postStore.ts     # Zustand: post list + current post (editor state)
-│   │   └── settingsStore.ts # Zustand: theme preference, editor defaults
-│   └── theme.ts             # React Native Paper MD3 themes (light + dark)
-├── assets/
-│   ├── icon.png             # 1024x1024 launcher icon
-│   └── adaptive-icon.png    # 1024x1024 RGBA foreground for Android adaptive icons
-├── docs/
-│   └── gen_icons.py         # Icon generator (pure Python stdlib, no Pillow)
-├── app.json                 # Expo config (package name, EAS project ID, permissions)
-└── eas.json                 # EAS build profiles (preview -> APK, production -> AAB)
-```
+- Design the architecture (layer separation, multi-instance model, HTML↔Markdown content strategy, security by design)
+- Write the precise technical specifications that guided generation (choosing `jose` over `jsonwebtoken` for Hermes compatibility, Ghost optimistic lock strategy, SecureStore isolation)
+- Make all functional design decisions
+- Read, understand, and validate every generated file
+- Debug issues the model couldn't resolve on its own
 
-### Key technical choices
+The model executed. The engineering — knowing what to build, why, under what constraints, and how to verify it's correct — stayed on my side.
 
-| Choice | Reason |
-|---|---|
-| **Expo SDK ~52 + expo-router** | File-based routing, managed workflow, EAS builds |
-| **React Native Paper v5 (MD3)** | Material You components, full dark mode support |
-| **Zustand v5** | Minimal state management, no boilerplate |
-| **@noble/hashes** | Ghost JWT requires SHA-256 HMAC — `jose` is incompatible with Hermes JS engine |
-| **expo-secure-store** | OS-level key storage (Android Keystore / iOS Secure Enclave) |
-| **WebView + inline HTML** | Markdown preview without a native renderer dependency |
+**I think being honest about this matters.** The mainstream conversation about AI and code swings between two equally false extremes: "AI will replace developers" and "vibe coding has no value, anyone can do it." Neither matches what I actually experienced here.
+
+What happened is closer to what happens when an experienced engineer works with a highly skilled contractor: the value lies in the ability to define the problem precisely, evaluate proposals critically, identify what's wrong, and make the structural decisions. Without that layer, LLM-generated code is either generic, or incorrect, or both.
+
+The tool amplifies. It doesn't invent what you don't already know how to think.
+
+The prompts used to generate this project are available in [`docs/PROMPTS.md`](docs/PROMPTS.md).
 
 ---
 
-## Ghost API setup
+## Documentation
 
-1. Open your Ghost Admin panel
-2. Go to **Settings → Integrations → Add custom integration**
-3. Name it (e.g. "Ghost Poster Mobile")
-4. Copy the **Admin API key** (format: `id:secret`)
-5. In Ghost Poster, go to **Settings → Instances → +** and enter:
-   - A display name for the instance
-   - The base URL of your Ghost site (e.g. `https://ghost.example.com`)
-   - The Admin API key
-
-The app tests the connection before saving. The key is stored encrypted on-device and never transmitted to any server other than your Ghost instance.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — architecture, data flow, application layers
+- [`docs/SETUP.md`](docs/SETUP.md) — full installation and Ghost configuration guide
+- [`docs/GHOST_API.md`](docs/GHOST_API.md) — Ghost API reference, error handling
+- [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — guide to extending or modifying the app
+- [`docs/PROMPTS.md`](docs/PROMPTS.md) — the Claude Code prompts used to generate the project
 
 ---
 
-## Development notes
+## About
 
-- Requires a **development build** (not Expo Go) for full functionality — `expo-secure-store` and `expo-image-picker` use native modules not included in Expo Go
-- The `android/` directory is gitignored — EAS runs its own `expo prebuild` during cloud builds
-- Font: **Barlow 700 Bold** via `@expo-google-fonts/barlow`, applied globally via `configureFonts`
+This project is signed **billisdead** — visual artist and graphic designer, image generation with Flux.1/ComfyUI → [billisdead.com](https://billisdead.com)
+
+If the app is useful to you and you'd like to support the work:
+
+→ **[Ko-fi](https://ko-fi.com/)** *(to be updated with Ko-fi handle)*
+
+This is not commercial software. It's a tool I built for my own use, published because it might be useful to others, with full transparency about how it was made.
 
 ---
 
 ## License
 
-MIT — do whatever you want, but don't blame the ghost.
+MIT
