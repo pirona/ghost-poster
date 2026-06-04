@@ -34,7 +34,13 @@ with open(ROOT / "app.json") as f:
 key_alias  = os.environ.get("RELEASE_KEY_ALIAS",        "af2ec445f739391a5c284c6c153b8018")
 store_pw   = os.environ.get("RELEASE_STORE_PASSWORD",   "")
 key_pw     = os.environ.get("RELEASE_KEY_PASSWORD",     "")
-ks_src     = os.environ.get("RELEASE_KEYSTORE_PATH",    "")
+
+# Cherche la keystore : RELEASE_KEYSTORE_PATH > .secrets/ > android/app/keystore/
+ks_src = os.environ.get("RELEASE_KEYSTORE_PATH", "")
+if not ks_src:
+    fallback = ROOT / ".secrets/release.keystore"
+    if fallback.exists():
+        ks_src = str(fallback)
 
 # 1. Keystore
 if ks_src and Path(ks_src).resolve() != KEYSTORE_DST.resolve():
@@ -42,8 +48,8 @@ if ks_src and Path(ks_src).resolve() != KEYSTORE_DST.resolve():
     shutil.copy2(ks_src, KEYSTORE_DST)
     print(f"  keystore copié depuis {ks_src}")
 elif not KEYSTORE_DST.exists():
-    sys.exit(f"Keystore introuvable : {KEYSTORE_DST}\n"
-             "Définis RELEASE_KEYSTORE_PATH ou place le fichier manuellement.")
+    sys.exit(f"Keystore introuvable.\n"
+             "Options : RELEASE_KEYSTORE_PATH=<chemin> ou place le fichier dans .secrets/release.keystore")
 
 # 2. gradle.properties
 props = GRADLE_PROPS.read_text()
