@@ -102,10 +102,11 @@ content = re.sub(
     flags=re.DOTALL,
 )
 
-# 3c. Nommage APK (idempotent)
+# 3c. Nommage APK — doit être DANS le bloc android {}
+# Le bloc android {} se termine par la ligne "}" avant "// Apply static values"
 if "outputFileName" not in content:
     naming = (
-        f'\n    applicationVariants.all {{ variant ->\n'
+        f'    applicationVariants.all {{ variant ->\n'
         f'        variant.outputs.all {{\n'
         f'            if (variant.buildType.name == "release") {{\n'
         f'                outputFileName = "ghost-poster-{version}.apk"\n'
@@ -113,7 +114,12 @@ if "outputFileName" not in content:
         f'        }}\n'
         f'    }}\n'
     )
-    content = content.replace("\ndependencies {", naming + "\ndependencies {")
+    # Insère avant la fermeture du bloc android {} (la } seule sur sa ligne
+    # qui précède le commentaire "// Apply static values")
+    content = content.replace(
+        "\n}\n\n// Apply static values",
+        f"\n    {naming.rstrip()}\n}}\n\n// Apply static values",
+    )
     print(f'  APK nommé ghost-poster-{version}.apk')
 
 BUILD_GRADLE.write_text(content)
