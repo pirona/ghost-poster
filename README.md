@@ -77,8 +77,6 @@ What happened is closer to what happens when an experienced engineer works with 
 
 The tool amplifies. It doesn't invent what you don't already know how to think.
 
-The prompts used to generate this project are available in [`docs/PROMPTS.md`](docs/PROMPTS.md).
-
 ---
 
 ## Documentation
@@ -87,7 +85,6 @@ The prompts used to generate this project are available in [`docs/PROMPTS.md`](d
 - [`docs/SETUP.md`](docs/SETUP.md) — full installation and Ghost configuration guide
 - [`docs/GHOST_API.md`](docs/GHOST_API.md) — Ghost API reference, error handling
 - [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — guide to extending or modifying the app
-- [`docs/PROMPTS.md`](docs/PROMPTS.md) — the Claude Code prompts used to generate the project
 - [`docs/SECURITY.md`](docs/SECURITY.md) — security architecture: credential storage, JWT, network constraints
 
 ---
