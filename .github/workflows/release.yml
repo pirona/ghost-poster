@@ -45,6 +45,7 @@ jobs:
         run: |
           mkdir -p android/app/keystore
           echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" \
+            | tr -d '[:space:]' \
             | base64 --decode > android/app/keystore/release.keystore
 
       - name: Configure Android signing & APK naming
