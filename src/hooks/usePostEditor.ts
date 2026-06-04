@@ -97,8 +97,8 @@ export function usePostEditor() {
         resetCurrentPost();
         router.replace('/(drawer)/posts');
         return true;
-      } catch {
-        // L'erreur est déjà stockée dans postStore.error et loggée dans le store
+      } catch (err) {
+        onError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde.');
         return false;
       }
     },

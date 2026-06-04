@@ -32,6 +32,7 @@ export default function ComposeScreen(): React.JSX.Element {
     setMarkdownContent,
     setTags,
     resetCurrentPost,
+    clearError,
   } = usePostStore();
 
   const { isDirty, isEditMode, originalStatus, isSaving, error, handleSave, confirmLeaveIfDirty } =
@@ -135,26 +136,33 @@ export default function ComposeScreen(): React.JSX.Element {
       {isPreviewMode ? (
         <MarkdownPreview markdown={content} />
       ) : (
-        <ScrollView
-          style={styles.editorScroll}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.editorContent}
-        >
-          <FeatureImagePicker disabled={isSaving} />
+        <View style={styles.editorBody}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.editorMeta}
+          >
+            <FeatureImagePicker disabled={isSaving} />
 
-          <TextInput
-            label="Titre"
-            value={title}
-            onChangeText={handleTitleChange}
-            mode="outlined"
-            error={!!titleError}
-            style={styles.titleInput}
-            disabled={isSaving}
-            returnKeyType="next"
-          />
-          {titleError && (
-            <Text style={[styles.fieldError, { color: colors.error }]}>{titleError}</Text>
-          )}
+            <TextInput
+              label="Titre"
+              value={title}
+              onChangeText={handleTitleChange}
+              mode="outlined"
+              error={!!titleError}
+              style={styles.titleInput}
+              disabled={isSaving}
+              returnKeyType="next"
+            />
+            {titleError && (
+              <Text style={[styles.fieldError, { color: colors.error }]}>{titleError}</Text>
+            )}
+
+            <TagChipList
+              tags={tags}
+              onTagsChange={setTags}
+              disabled={isSaving}
+            />
+          </ScrollView>
 
           <TextInput
             label="Contenu (Markdown)"
@@ -162,16 +170,12 @@ export default function ComposeScreen(): React.JSX.Element {
             onChangeText={setMarkdownContent}
             mode="outlined"
             multiline
+            scrollEnabled
             style={styles.contentInput}
             disabled={isSaving}
+            textAlignVertical="top"
           />
-
-          <TagChipList
-            tags={tags}
-            onTagsChange={setTags}
-            disabled={isSaving}
-          />
-        </ScrollView>
+        </View>
       )}
 
       <Divider />
@@ -200,18 +204,10 @@ export default function ComposeScreen(): React.JSX.Element {
       </View>
 
       <Snackbar
-        visible={!!error && !snackbarMessage}
-        onDismiss={() => {}}
-        duration={4000}
-        action={{ label: 'OK', onPress: () => {} }}
-      >
-        {error}
-      </Snackbar>
-
-      <Snackbar
         visible={!!snackbarMessage}
         onDismiss={() => setSnackbarMessage(null)}
-        duration={2500}
+        duration={3500}
+        action={{ label: 'OK', onPress: () => setSnackbarMessage(null) }}
       >
         {snackbarMessage}
       </Snackbar>
@@ -249,20 +245,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  editorScroll: {
+  editorBody: {
     flex: 1,
   },
-  editorContent: {
+  editorMeta: {
     padding: 16,
     gap: 12,
-    paddingBottom: 32,
+    paddingBottom: 8,
   },
   titleInput: {
     backgroundColor: 'transparent',
   },
   contentInput: {
     backgroundColor: 'transparent',
-    minHeight: 200,
+    flex: 1,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    minHeight: 120,
   },
   fieldError: {
     fontSize: 12,

@@ -72,6 +72,8 @@ interface PostActions {
   resetCurrentPost(): void;
   /** Réinitialise la liste des posts (changement d'instance active). */
   resetPosts(): void;
+  /** Efface l'erreur courante (appelé depuis l'UI après affichage). */
+  clearError(): void;
   /** Charge la première page de posts. reset=true repart de la page 1. */
   fetchPosts(reset?: boolean): Promise<void>;
   /** Charge la page suivante (infinite scroll). */
@@ -164,6 +166,10 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
 
   resetPosts(): void {
     set({ posts: [], currentPage: 1, hasMore: true, error: null });
+  },
+
+  clearError(): void {
+    set({ error: null });
   },
 
   // -------------------------------------------------------------------------

@@ -9,8 +9,11 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 import { uploadImage } from '../api/ghostClient';
+
+const MAX_WIDTH = 1920;
 
 // ---------------------------------------------------------------------------
 // Hook
@@ -50,20 +53,25 @@ export function useImageUpload() {
 
     if (result.canceled || !result.assets[0]) return;
 
-    const { uri } = result.assets[0];
+    const { uri, width } = result.assets[0];
     setIsUploading(true);
 
     try {
-      const imageUrl = await uploadImage(uri);
-      // L'image est insérée en fin de contenu — contrainte TextInput React Native
-      // (le curseur n'est pas accessible programmatiquement)
+      const actions: ImageManipulator.Action[] =
+        width && width > MAX_WIDTH ? [{ resize: { width: MAX_WIDTH } }] : [];
+
+      const manipulated = await ImageManipulator.manipulateAsync(
+        uri,
+        actions,
+        { compress: 0.85, format: ImageManipulator.SaveFormat.JPEG },
+      );
+
+      const imageUrl = await uploadImage(manipulated.uri);
       onInsert(`\n![](${imageUrl})`);
     } catch (err) {
-      console.error('Erreur upload image:', err instanceof Error ? err.message : err);
-      Alert.alert(
-        'Échec de l\'upload',
-        err instanceof Error ? err.message : 'Impossible d\'uploader l\'image. Réessayez.',
-      );
+      const message = err instanceof Error ? err.message : 'Impossible d\'uploader l\'image.';
+      console.error('Erreur upload image:', message);
+      Alert.alert('Échec de l\'upload', message);
     } finally {
       setIsUploading(false);
     }
