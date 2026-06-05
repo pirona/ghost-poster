@@ -74,6 +74,7 @@ The tool amplifies. It doesn't invent what you don't already know how to think.
 - [`docs/GHOST_API.md`](docs/GHOST_API.md) — Ghost API reference, error handling
 - [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — guide to extending the app
 - [`docs/SECURITY.md`](docs/SECURITY.md) — credential storage, JWT, network constraints
+- [`docs/REVERSE_PROXY.md`](docs/REVERSE_PROXY.md) — reverse proxy configuration (HAProxy, Nginx, Caddy, offsite VPS)
 
 ---
 
