@@ -192,7 +192,15 @@ export async function deletePost(id: string): Promise<void> {
  */
 export async function uploadImage(localUri: string): Promise<string> {
   const filename = localUri.split('/').pop() ?? 'image.jpg';
-  const type = filename.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
+  const ext = filename.toLowerCase().split('.').pop() ?? '';
+  const MIME_MAP: Record<string, string> = {
+    png: 'image/png',
+    gif: 'image/gif',
+    webp: 'image/webp',
+    heic: 'image/heic',
+    heif: 'image/heif',
+  };
+  const type = MIME_MAP[ext] ?? 'image/jpeg';
 
   const formData = new FormData();
   // React Native utilise un objet {uri, name, type} là où Web attend un Blob

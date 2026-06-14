@@ -11,6 +11,7 @@
 
 import { useState } from 'react';
 import { Alert } from 'react-native';
+import axios from 'axios';
 
 import { useInstanceStore, GhostInstance } from '../store/instanceStore';
 import { testGhostConnection } from '../api/ghostClient';
@@ -113,11 +114,16 @@ export function useInstances() {
       });
       return true;
     } catch (err) {
-      const message =
-        err instanceof Error
-          ? `Connexion impossible : ${err.message}`
-          : 'Connexion impossible. Vérifiez l\'URL et la clé API.';
-      onError('url', message);
+      const status = axios.isAxiosError(err) ? err.response?.status : null;
+      if (status === 401 || status === 403) {
+        onError('apiKey', 'Clé API invalide ou accès refusé (401/403).');
+      } else {
+        const message =
+          err instanceof Error
+            ? `Connexion impossible : ${err.message}`
+            : 'Connexion impossible. Vérifiez l\'URL.';
+        onError('url', message);
+      }
       return false;
     } finally {
       setIsTesting(false);
