@@ -308,4 +308,8 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
   setStatusFilter(filter: StatusFilter): void {
     set({ statusFilter: filter, posts: [], currentPage: 1, hasMore: true });
   },
+
+  clearError(): void {
+    set({ error: null });
+  },
 }));

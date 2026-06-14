@@ -1,220 +1,88 @@
 #!/usr/bin/env python3
 """
-Generate ghost-poster app icons (icon.png and adaptive-icon.png).
-Pure stdlib: no Pillow, no numpy.
+Generate ghost-poster app icons (icon.png and adaptive-icon.png)
+from the official Ghost favicon SVG.
 
-Visual: white ghost on #15171A, with a Ghostbusters-style no-ghost badge
-partially behind the ghost — "who ya gonna post?" joke.
+Requirements: ImageMagick (magick), Pillow (PIL)
+
+Usage:
+    python3 docs/gen_icons.py
+
+Outputs:
+    assets/icon.png          — 1024x1024 opaque (#15171A background)
+    assets/adaptive-icon.png — 1024x1024 RGBA transparent (white orb only)
 """
 
-import struct
-import zlib
-import math
 import os
-import time
+import re
+import subprocess
+import tempfile
 
-# ── Canvas ──────────────────────────────────────────────────────────────────
-SIZE = 1024
-CX = SIZE // 2  # 512
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.join(SCRIPT_DIR, '..', 'assets')
 
-# ── Colors ──────────────────────────────────────────────────────────────────
-BG     = (0x15, 0x17, 0x1A)
-WHITE  = (0xFF, 0xFF, 0xFF)
-RED    = (0xE5, 0x39, 0x35)   # Ghostbusters red
+# Official Ghost favicon SVG (https://ghost.org/favicon.svg)
+GHOST_SVG = """<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M80 160C102.401 160 129.478 158.836 144 144C158.121 129.574 160 101.782 160 80C160 57.8746 158.516 30.4824 144 16C129.528 1.56212 102.057 0 80 0C57.9327 0 30.4734 1.55064 16 16C1.49503 30.4809 0 57.8845 0 80C0 102.387 1.17997 129.48 16 144C30.4287 158.137 58.2042 160 80 160Z" fill="#15171A"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M80.3011 24.4492C111.042 24.4492 136 49.2522 136 79.8023C136 110.352 111.042 135.155 80.3011 135.155C49.5599 135.155 24.6021 110.352 24.6021 79.8023C24.6021 49.2522 49.5599 24.4492 80.3011 24.4492ZM36.3406 68.1213C39.1249 45.1913 51.4207 33.7941 79.1492 30.6968C92.3695 29.2199 107.382 40.3893 111.621 45.5337C120.188 55.9292 131 68.3019 131 82.2364C131 101.022 115.856 111.57 99.7008 120.16C92.4199 124.031 84.5541 127.778 75.569 127.778C52.4768 127.778 33.0412 109.756 33.0412 86.8068C33.0412 80.7073 35.5782 74.3993 36.3406 68.1213Z" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M80 140.124C113.689 140.124 141 112.983 141 79.5031C141 46.023 113.689 18.882 80 18.882C46.3106 18.882 19 46.023 19 79.5031C19 112.983 46.3106 140.124 80 140.124ZM80 133.389C109.946 133.389 134.222 109.263 134.222 79.5031C134.222 49.743 109.946 25.6176 80 25.6176C50.0539 25.6176 25.7778 49.743 25.7778 79.5031C25.7778 109.263 50.0539 133.389 80 133.389Z" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0">
+<rect width="160" height="160" fill="white"/>
+</clipPath>
+</defs>
+</svg>"""
 
-# ── Ghost geometry ───────────────────────────────────────────────────────────
-# Vertically centered in safe zone (170–854 for adaptive icon masks)
-# Ghost spans y=210 to y=797 → center ≈ 503 ≈ 512 ✓
-
-HEAD_CX = CX
-HEAD_CY = 440
-HEAD_R  = 230
-
-BODY_L   = HEAD_CX - HEAD_R  # 282
-BODY_R   = HEAD_CX + HEAD_R  # 742
-BODY_TOP = HEAD_CY           # body rect starts at head center
-BODY_BOT = 720
-
-BUMP_R   = 77
-BUMP_CXS = (BODY_L + BUMP_R, CX, BODY_R - BUMP_R)  # 359, 512, 665
-
-EYE_CY   = HEAD_CY - 65      # 375
-EYE_R    = 54
-EYE_L_CX = CX - 88           # 424  — left eye
-EYE_R_CX = CX + 88           # 600  — right eye
-
-# ── Ghostbusters badge ───────────────────────────────────────────────────────
-# Partially behind the ghost (right-lower body area): ghost "bursts through"
-# → visual pun: ghost is not busted, it's posting.
-BADGE_CX   = 690
-BADGE_CY   = 756
-BADGE_R    = 72
-BADGE_LH   = 13              # diagonal line half-width (pixels)
-
-AA = 1.5  # anti-aliasing radius
-
-# ── Helpers ──────────────────────────────────────────────────────────────────
-
-def aa_circle(dx: float, dy: float, r: float) -> float:
-    """Coverage of a filled circle with soft anti-aliased edge."""
-    d2 = dx * dx + dy * dy
-    inner = (r - AA) ** 2
-    if d2 <= inner:
-        return 1.0
-    outer = (r + AA) ** 2
-    if d2 >= outer:
-        return 0.0
-    return (r + AA - math.sqrt(d2)) / (2.0 * AA)
+SVG_TRANSPARENT = re.sub(r'<path[^>]*fill="#15171A"[^/]*/>', '', GHOST_SVG)
 
 
-def ghost_coverage(x: int, y: int) -> float:
-    """Coverage of ghost silhouette (union of head, body, bumps)."""
-    # Head
-    c = aa_circle(x - HEAD_CX, y - HEAD_CY, HEAD_R)
-    if c >= 1.0:
-        return 1.0
-
-    # Body rect — AA on left/right edges only (top merges with head, bottom with bumps)
-    if HEAD_CY - AA <= y <= BODY_BOT + AA:
-        x_cov = (
-            min(1.0, max(0.0, (x - BODY_L + AA) / (2.0 * AA))) *
-            min(1.0, max(0.0, (BODY_R - x + AA) / (2.0 * AA)))
+def render_svg(svg_content: str, bg: str, output: str) -> None:
+    with tempfile.NamedTemporaryFile(suffix='.svg', mode='w', delete=False) as f:
+        f.write(svg_content)
+        tmp = f.name
+    try:
+        subprocess.run(
+            ['magick', f'-background', bg, '-density', '384', tmp,
+             '-resize', '1024x1024', '-depth', '8', output],
+            check=True
         )
-        y_cov = (
-            min(1.0, max(0.0, (y - (BODY_TOP - AA)) / (2.0 * AA))) *
-            min(1.0, max(0.0, (BODY_BOT + AA - y) / (2.0 * AA)))
-        )
-        rc = x_cov * y_cov
-        if rc > c:
-            c = rc
-        if c >= 1.0:
-            return 1.0
-
-    # Bumps (convex, hanging below body bottom)
-    for bx in BUMP_CXS:
-        bc = aa_circle(x - bx, y - BODY_BOT, BUMP_R)
-        if bc > 0 and y >= BODY_BOT - AA:
-            if bc > c:
-                c = bc
-            if c >= 1.0:
-                return 1.0
-
-    return c
+    finally:
+        os.unlink(tmp)
 
 
-def eye_coverage(x: int, y: int) -> float:
-    """Coverage of eyes (holes cut into ghost)."""
-    e1 = aa_circle(x - EYE_L_CX, y - EYE_CY, EYE_R)
-    e2 = aa_circle(x - EYE_R_CX, y - EYE_CY, EYE_R)
-    return max(e1, e2)
+def make_adaptive(icon_path: str, output: str) -> None:
+    from PIL import Image
 
+    img = Image.open(icon_path).convert('RGBA')
+    pixels = img.load()
+    w, h = img.size
 
-def badge_pixel(x: int, y: int):
-    """
-    Returns (is_in_badge, is_on_line) for Ghostbusters badge.
-    badge = red filled circle + white diagonal line.
-    """
-    dx = x - BADGE_CX
-    dy = y - BADGE_CY
-    circ = aa_circle(dx, dy, BADGE_R)
-    if circ <= 0.0:
-        return 0.0, 0.0
-    # Diagonal line (top-left → bottom-right) through badge center
-    # Normal distance = |(dx - dy)| / sqrt(2)
-    line_dist = abs(dx - dy) / 1.4142135
-    line_cov = circ * min(1.0, max(0.0, (BADGE_LH - line_dist + AA) / (2.0 * AA)))
-    return circ, line_cov
+    bg_r, bg_g, bg_b = 21, 23, 26
+    max_dist = ((255 - bg_r) ** 2 + (255 - bg_g) ** 2 + (255 - bg_b) ** 2) ** 0.5
 
+    result = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    res_px = result.load()
 
-# ── PNG writer ───────────────────────────────────────────────────────────────
+    for y in range(h):
+        for x in range(w):
+            r, g, b, _ = pixels[x, y]
+            dist = ((r - bg_r) ** 2 + (g - bg_g) ** 2 + (b - bg_b) ** 2) ** 0.5
+            alpha = int(dist / max_dist * 255)
+            res_px[x, y] = (255, 255, 255, alpha)
 
-def make_png(pixels_rgba: bytes) -> bytes:
-    """Encode raw RGBA bytes (SIZE×SIZE×4) as a valid PNG."""
-    def chunk(tag: bytes, data: bytes) -> bytes:
-        buf = tag + data
-        return struct.pack('>I', len(data)) + buf + struct.pack('>I', zlib.crc32(buf) & 0xFFFFFFFF)
+    result.save(output)
 
-    ihdr = struct.pack('>IIBBBBB', SIZE, SIZE, 8, 6, 0, 0, 0)
-    raw = bytearray()
-    stride = SIZE * 4
-    for row in range(SIZE):
-        raw.append(0)  # filter: None
-        raw += pixels_rgba[row * stride:(row + 1) * stride]
-
-    return (
-        b'\x89PNG\r\n\x1a\n'
-        + chunk(b'IHDR', ihdr)
-        + chunk(b'IDAT', zlib.compress(bytes(raw), 6))
-        + chunk(b'IEND', b'')
-    )
-
-
-# ── Render ───────────────────────────────────────────────────────────────────
-
-def render(with_bg: bool) -> bytes:
-    """
-    Render one icon.
-    with_bg=True  → icon.png     (opaque #15171A background)
-    with_bg=False → adaptive-icon.png (transparent background)
-    """
-    pixels = bytearray(SIZE * SIZE * 4)
-
-    for y in range(SIZE):
-        for x in range(SIZE):
-            idx = (y * SIZE + x) * 4
-
-            gc   = ghost_coverage(x, y)
-            ec   = eye_coverage(x, y) if gc > 0 else 0.0
-            net  = gc * (1.0 - ec)           # ghost minus eyes
-
-            b_circ, b_line = badge_pixel(x, y)
-            # Badge is drawn UNDER ghost — only visible where ghost is absent
-            badge_vis  = b_circ * (1.0 - gc)
-            line_vis   = b_line * (1.0 - gc)
-
-            if with_bg:
-                # Opaque: composite over BG
-                r, g, b = BG
-                if net > 0:
-                    r = round(BG[0] + (WHITE[0] - BG[0]) * net)
-                    g = round(BG[1] + (WHITE[1] - BG[1]) * net)
-                    b = round(BG[2] + (WHITE[2] - BG[2]) * net)
-                elif line_vis > 0:
-                    r = round(BG[0] + (WHITE[0] - BG[0]) * line_vis)
-                    g = round(BG[1] + (WHITE[1] - BG[1]) * line_vis)
-                    b = round(BG[2] + (WHITE[2] - BG[2]) * line_vis)
-                elif badge_vis > 0:
-                    r = round(BG[0] + (RED[0] - BG[0]) * badge_vis)
-                    g = round(BG[1] + (RED[1] - BG[1]) * badge_vis)
-                    b = round(BG[2] + (RED[2] - BG[2]) * badge_vis)
-                pixels[idx:idx + 4] = (r, g, b, 255)
-            else:
-                # Transparent: RGBA
-                if net > 0:
-                    a = round(255 * net)
-                    pixels[idx:idx + 4] = (255, 255, 255, a)
-                elif line_vis > 0:
-                    a = round(255 * line_vis)
-                    pixels[idx:idx + 4] = (255, 255, 255, a)
-                elif badge_vis > 0:
-                    a = round(255 * badge_vis)
-                    pixels[idx:idx + 4] = (RED[0], RED[1], RED[2], a)
-                # else stays (0,0,0,0)
-
-    return make_png(bytes(pixels))
-
-
-# ── Main ─────────────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    out_dir = os.path.join(os.path.dirname(__file__), '..', 'assets')
+    icon_path = os.path.join(ASSETS_DIR, 'icon.png')
+    adaptive_path = os.path.join(ASSETS_DIR, 'adaptive-icon.png')
 
-    for name, with_bg in [('icon.png', True), ('adaptive-icon.png', False)]:
-        path = os.path.join(out_dir, name)
-        print(f'Rendering {name}...', flush=True)
-        t0 = time.time()
-        data = render(with_bg)
-        elapsed = time.time() - t0
-        with open(path, 'wb') as f:
-            f.write(data)
-        print(f'  → {path}  ({len(data)//1024} KB, {elapsed:.1f}s)', flush=True)
+    print('Rendering icon.png (opaque)...')
+    render_svg(GHOST_SVG, '#15171A', icon_path)
+    print(f'  → {icon_path}')
+
+    print('Rendering adaptive-icon.png (transparent)...')
+    make_adaptive(icon_path, adaptive_path)
+    print(f'  → {adaptive_path}')

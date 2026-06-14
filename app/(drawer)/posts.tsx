@@ -30,6 +30,7 @@ export default function PostsScreen(): React.JSX.Element {
   } = usePostStore();
 
   const [snackbarMessage, setSnackbarMessage] = React.useState<string | null>(null);
+  const [isPullRefreshing, setIsPullRefreshing] = React.useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -80,8 +81,14 @@ export default function PostsScreen(): React.JSX.Element {
     );
   }
 
+  async function handlePullRefresh(): Promise<void> {
+    setIsPullRefreshing(true);
+    await fetchPosts(true);
+    setIsPullRefreshing(false);
+  }
+
   function renderFooter(): React.JSX.Element | null {
-    if (!isLoading || posts.length === 0) return null;
+    if (!isLoading || posts.length === 0 || isPullRefreshing) return null;
     return <ActivityIndicator style={styles.footerLoader} />;
   }
 
@@ -133,8 +140,8 @@ export default function PostsScreen(): React.JSX.Element {
         ListEmptyComponent={renderEmpty}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.4}
-        onRefresh={() => fetchPosts(true)}
-        refreshing={isLoading && posts.length === 0}
+        onRefresh={handlePullRefresh}
+        refreshing={isPullRefreshing}
         contentContainerStyle={posts.length === 0 ? styles.emptyContainer : styles.listContent}
       />
 

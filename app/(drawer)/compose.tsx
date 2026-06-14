@@ -107,7 +107,12 @@ export default function ComposeScreen(): React.JSX.Element {
             {isPublished ? 'Édition — publié' : 'Édition — brouillon'}
           </Chip>
           {isDirty && (
-            <Chip compact icon="circle-small" style={styles.dirtyChip} textStyle={styles.dirtyChipText}>
+            <Chip
+              compact
+              icon="circle-small"
+              style={[styles.dirtyChip, { backgroundColor: colors.primaryContainer }]}
+              textStyle={[styles.dirtyChipText, { color: colors.onPrimaryContainer }]}
+            >
               Modifié
             </Chip>
           )}
@@ -204,6 +209,15 @@ export default function ComposeScreen(): React.JSX.Element {
       </View>
 
       <Snackbar
+        visible={!!error && !snackbarMessage}
+        onDismiss={clearError}
+        duration={4000}
+        action={{ label: 'OK', onPress: clearError }}
+      >
+        {error}
+      </Snackbar>
+
+      <Snackbar
         visible={!!snackbarMessage}
         onDismiss={() => setSnackbarMessage(null)}
         duration={3500}
@@ -228,11 +242,8 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   editChip: {},
-  dirtyChip: {
-    backgroundColor: '#FFF8E1',
-  },
+  dirtyChip: {},
   dirtyChipText: {
-    color: '#F57F17',
     fontSize: 11,
   },
   toolbar: {

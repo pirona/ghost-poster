@@ -68,7 +68,17 @@ export function htmlToMarkdown(html: string | null | undefined): string {
     return text.split('\n').map((l: string) => `> ${l.trim()}`).join('\n') + '\n\n';
   });
 
-  // Lists — li first, then the container
+  // Ordered lists — numbered items (must be processed before stripping UL/OL containers)
+  s = s.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, inner) => {
+    let n = 0;
+    const items = inner.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, li: string) => {
+      n++;
+      return `${n}. ${li.replace(/<[^>]+>/g, '').trim()}\n`;
+    });
+    return '\n' + items + '\n';
+  });
+
+  // Unordered lists — remaining LI (inside UL)
   s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, inner) =>
     `- ${inner.replace(/<[^>]+>/g, '').trim()}\n`
   );
