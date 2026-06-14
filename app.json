@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ghost Poster",
     "slug": "ghost-poster",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "scheme": "ghost-poster",
     "platforms": [
       "android"
