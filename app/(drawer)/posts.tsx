@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { StyleSheet, View, FlatList } from 'react-native';
+import { StyleSheet, View, FlatList, Image } from 'react-native';
 import { Text, Chip, Button, ActivityIndicator, Snackbar, useTheme } from 'react-native-paper';
 import { useRouter, useFocusEffect } from 'expo-router';
 
@@ -116,9 +116,24 @@ export default function PostsScreen(): React.JSX.Element {
 
     return (
       <View style={styles.centered}>
-        <Text variant="bodyLarge" style={{ color: colors.onSurfaceVariant, textAlign: 'center' }}>
-          Aucun post trouvé.
+        <Image
+          source={require('../../assets/icon.png')}
+          style={styles.emptyIcon}
+          resizeMode="contain"
+        />
+        <Text variant="titleMedium" style={{ color: colors.onSurface, textAlign: 'center' }}>
+          Aucun post
         </Text>
+        <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant, textAlign: 'center' }}>
+          Créez votre premier article
+        </Text>
+        <Button
+          mode="contained"
+          onPress={() => router.navigate('/(drawer)/compose')}
+          style={styles.emptyButton}
+        >
+          Nouveau post
+        </Button>
       </View>
     );
   }
@@ -181,6 +196,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 32,
     gap: 12,
+  },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    marginBottom: 8,
+    opacity: 0.4,
+  },
+  emptyButton: {
+    marginTop: 4,
   },
   retryButton: {
     marginTop: 8,

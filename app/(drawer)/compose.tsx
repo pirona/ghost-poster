@@ -119,10 +119,12 @@ export default function ComposeScreen(): React.JSX.Element {
         </View>
       )}
 
-      <View style={styles.toolbar}>
+      <View style={[styles.toolbar, { backgroundColor: colors.surfaceVariant }]}>
         <View style={styles.toolbarLeft}>
           <IconButton
             icon={isPreviewMode ? 'pencil-outline' : 'eye-outline'}
+            iconColor={colors.onSurfaceVariant}
+            size={22}
             onPress={() => setIsPreviewMode((prev) => !prev)}
             accessibilityLabel={isPreviewMode ? 'Passer en mode édition' : 'Aperçu'}
           />
@@ -131,6 +133,8 @@ export default function ComposeScreen(): React.JSX.Element {
         {isEditMode && (
           <IconButton
             icon="refresh"
+            iconColor={colors.onSurfaceVariant}
+            size={22}
             onPress={onPressReset}
             accessibilityLabel="Annuler les modifications"
           />
@@ -250,7 +254,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
   toolbarLeft: {
     flexDirection: 'row',

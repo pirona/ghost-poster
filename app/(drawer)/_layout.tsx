@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
 import type { DrawerContentComponentProps } from '@react-navigation/drawer';
@@ -52,11 +52,18 @@ function DrawerContent(props: DrawerContentComponentProps): React.JSX.Element {
       contentContainerStyle={styles.scrollContent}
     >
       <View style={[styles.header, { borderBottomColor: colors.outlineVariant }]}>
-        <Text variant="titleLarge" style={[styles.appName, { color: colors.onSurface }]}>
-          Ghost Poster
-        </Text>
+        <View style={styles.headerTop}>
+          <Image
+            source={require('../../assets/icon.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text variant="titleLarge" style={[styles.appName, { color: colors.onSurface }]}>
+            Ghost Poster
+          </Text>
+        </View>
         {activeInstance && (
-          <Text variant="bodySmall" style={{ color: colors.primary }}>
+          <Text variant="bodySmall" style={{ color: colors.onSurfaceVariant }}>
             {activeInstance.name}
           </Text>
         )}
@@ -153,10 +160,20 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginBottom: 8,
+    gap: 6,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  logo: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
   },
   appName: {
     fontWeight: '700',
-    marginBottom: 2,
   },
   instanceRow: {
     flexDirection: 'row',

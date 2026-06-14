@@ -1,6 +1,24 @@
 import { MD3LightTheme, MD3DarkTheme, configureFonts } from 'react-native-paper';
 
-const fonts = configureFonts({ config: { fontFamily: 'Barlow_700Bold' } });
+const fonts = configureFonts({
+  config: {
+    displayLarge:   { fontFamily: 'Barlow_700Bold' },
+    displayMedium:  { fontFamily: 'Barlow_700Bold' },
+    displaySmall:   { fontFamily: 'Barlow_700Bold' },
+    headlineLarge:  { fontFamily: 'Barlow_700Bold' },
+    headlineMedium: { fontFamily: 'Barlow_700Bold' },
+    headlineSmall:  { fontFamily: 'Barlow_600SemiBold' },
+    titleLarge:     { fontFamily: 'Barlow_600SemiBold' },
+    titleMedium:    { fontFamily: 'Barlow_600SemiBold' },
+    titleSmall:     { fontFamily: 'Barlow_600SemiBold' },
+    labelLarge:     { fontFamily: 'Barlow_600SemiBold' },
+    labelMedium:    { fontFamily: 'Barlow_400Regular' },
+    labelSmall:     { fontFamily: 'Barlow_400Regular' },
+    bodyLarge:      { fontFamily: 'Barlow_400Regular' },
+    bodyMedium:     { fontFamily: 'Barlow_400Regular' },
+    bodySmall:      { fontFamily: 'Barlow_400Regular' },
+  },
+});
 
 export const lightTheme = {
   ...MD3LightTheme,

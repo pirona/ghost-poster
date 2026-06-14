@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { Redirect } from 'expo-router';
-import { useTheme } from 'react-native-paper';
+import { ActivityIndicator, useTheme } from 'react-native-paper';
 
 import { useInstanceStore } from '../src/store/instanceStore';
 
@@ -13,7 +13,12 @@ export default function Index(): React.JSX.Element {
   if (isLoading) {
     return (
       <View style={[styles.splash, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <Image
+          source={require('../assets/icon.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        <ActivityIndicator size="large" color={colors.primary} style={styles.indicator} />
       </View>
     );
   }
@@ -30,5 +35,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    marginBottom: 32,
+  },
+  indicator: {
+    marginTop: 8,
   },
 });

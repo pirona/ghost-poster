@@ -51,6 +51,8 @@ export interface GhostPost {
   tags: GhostTag[];
   /** URL de l'image à la une — null si aucune image définie. */
   feature_image: string | null;
+  /** Extrait personnalisé — null si non défini dans Ghost. */
+  custom_excerpt: string | null;
   /** ISO 8601 — obligatoire dans les requêtes PUT (optimistic lock). */
   updated_at: string;
   published_at: string | null;

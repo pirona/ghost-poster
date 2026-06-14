@@ -5,7 +5,12 @@ import { PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { useFonts, Barlow_700Bold } from '@expo-google-fonts/barlow';
+import {
+  useFonts,
+  Barlow_400Regular,
+  Barlow_600SemiBold,
+  Barlow_700Bold,
+} from '@expo-google-fonts/barlow';
 
 import { useInstanceStore } from '../src/store/instanceStore';
 import { useSettingsStore } from '../src/store/settingsStore';
@@ -16,7 +21,7 @@ export default function RootLayout(): React.JSX.Element {
   const loadSettings = useSettingsStore((s) => s.loadSettings);
   const themePreference = useSettingsStore((s) => s.themePreference);
   const systemColorScheme = useColorScheme();
-  useFonts({ Barlow_700Bold });
+  useFonts({ Barlow_400Regular, Barlow_600SemiBold, Barlow_700Bold });
 
   useEffect(() => {
     loadInstances();

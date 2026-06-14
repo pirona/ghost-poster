@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, Alert } from 'react-native';
 import { Text, Surface, useTheme } from 'react-native-paper';
 import { Swipeable } from 'react-native-gesture-handler';
 
@@ -54,15 +54,35 @@ export function PostListItem({ post, onPress, onDelete }: PostListItemProps): Re
     <Swipeable ref={swipeableRef} renderRightActions={renderRightActions} friction={2}>
       <Surface style={styles.surface} elevation={1}>
         <TouchableOpacity style={styles.content} onPress={() => onPress(post)} activeOpacity={0.7}>
-          <View style={styles.header}>
-            <StatusBadge status={post.status} />
-            <Text style={[styles.date, { color: colors.onSurfaceVariant }]} variant="labelSmall">
-              {formatDate(post.updated_at)}
-            </Text>
+          <View style={styles.row}>
+            <View style={styles.textContent}>
+              <View style={styles.header}>
+                <StatusBadge status={post.status} />
+                <Text style={[styles.date, { color: colors.onSurfaceVariant }]} variant="labelSmall">
+                  {formatDate(post.updated_at)}
+                </Text>
+              </View>
+              <Text style={styles.title} variant="titleMedium" numberOfLines={2}>
+                {post.title || '(Sans titre)'}
+              </Text>
+              {post.custom_excerpt ? (
+                <Text
+                  variant="bodySmall"
+                  style={{ color: colors.onSurfaceVariant }}
+                  numberOfLines={2}
+                >
+                  {post.custom_excerpt}
+                </Text>
+              ) : null}
+            </View>
+            {post.feature_image ? (
+              <Image
+                source={{ uri: post.feature_image }}
+                style={styles.thumbnail}
+                resizeMode="cover"
+              />
+            ) : null}
           </View>
-          <Text style={styles.title} variant="titleMedium" numberOfLines={2}>
-            {post.title || '(Sans titre)'}
-          </Text>
         </TouchableOpacity>
       </Surface>
     </Swipeable>
@@ -77,7 +97,15 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-    gap: 8,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  textContent: {
+    flex: 1,
+    gap: 6,
   },
   header: {
     flexDirection: 'row',
@@ -88,6 +116,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   date: {},
+  thumbnail: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    alignSelf: 'center',
+  },
   deleteAction: {
     backgroundColor: '#D32F2F',
     justifyContent: 'center',
