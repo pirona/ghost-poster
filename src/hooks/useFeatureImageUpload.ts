@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -14,6 +15,7 @@ export function useFeatureImageUpload() {
   async function pickAndUpload(onUploaded: (url: string) => void): Promise<void> {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
+      console.warn('[FeatureImageUpload] Permission galerie refusée');
       Alert.alert(
         'Permission refusée',
         "L'accès à la galerie est nécessaire pour choisir une image à la une.",
@@ -22,15 +24,19 @@ export function useFeatureImageUpload() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       allowsEditing: false,
       allowsMultipleSelection: false,
       quality: 1,
     });
 
-    if (result.canceled || !result.assets[0]) return;
+    if (result.canceled || !result.assets[0]) {
+      console.log('[FeatureImageUpload] Sélection annulée');
+      return;
+    }
 
     const { uri, width } = result.assets[0];
+    console.log('[FeatureImageUpload] Image sélectionnée — uri:', uri, 'width:', width);
     setIsUploading(true);
 
     try {
@@ -42,10 +48,13 @@ export function useFeatureImageUpload() {
         actions,
         { compress: JPEG_QUALITY, format: ImageManipulator.SaveFormat.JPEG },
       );
+      console.log('[FeatureImageUpload] Après redimensionnement:', manipulated.uri);
 
       const imageUrl = await uploadImage(manipulated.uri);
+      console.log('[FeatureImageUpload] Upload réussi:', imageUrl);
       onUploaded(imageUrl);
     } catch (err) {
+      console.error('[FeatureImageUpload] Erreur:', err);
       Alert.alert(
         "Échec de l'upload",
         err instanceof Error ? err.message : "Impossible d'uploader l'image. Réessayez.",

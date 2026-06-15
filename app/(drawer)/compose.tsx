@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -15,8 +16,11 @@ import {
   Chip,
   IconButton,
   ActivityIndicator,
+  Dialog,
+  Portal,
   useTheme,
 } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 
 import { usePostStore } from '../../src/store/postStore';
 import { usePostEditor } from '../../src/hooks/usePostEditor';
@@ -26,12 +30,14 @@ import { ImagePickerButton } from '../../src/components/ImagePickerButton';
 import { FeatureImagePicker } from '../../src/components/FeatureImagePicker';
 
 export default function ComposeScreen(): React.JSX.Element {
+  const router = useRouter();
   const {
     currentPost,
     setTitle,
     setMarkdownContent,
     setTags,
     resetCurrentPost,
+    deletePost,
     clearError,
   } = usePostStore();
 
@@ -43,10 +49,12 @@ export default function ComposeScreen(): React.JSX.Element {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const title = currentPost?.title ?? '';
   const content = currentPost?.markdownContent ?? '';
   const tags = currentPost?.tags ?? [];
+  const ghostId = currentPost?.ghostId;
 
   function handleTitleChange(value: string): void {
     setTitle(value);
@@ -87,6 +95,18 @@ export default function ComposeScreen(): React.JSX.Element {
       setIsPreviewMode(false);
       setTitleError(null);
     });
+  }
+
+  async function handleConfirmDelete(): Promise<void> {
+    setShowDeleteDialog(false);
+    if (!ghostId) return;
+    try {
+      await deletePost(ghostId);
+      resetCurrentPost();
+      router.replace('/(drawer)/posts');
+    } catch {
+      setSnackbarMessage('Impossible de supprimer le post.');
+    }
   }
 
   const isPublished = originalStatus === 'published';
@@ -130,15 +150,27 @@ export default function ComposeScreen(): React.JSX.Element {
           />
           <ImagePickerButton onInsert={handleImageInsert} disabled={isSaving} />
         </View>
-        {isEditMode && (
-          <IconButton
-            icon="refresh"
-            iconColor={colors.onSurfaceVariant}
-            size={22}
-            onPress={onPressReset}
-            accessibilityLabel="Annuler les modifications"
-          />
-        )}
+        <View style={styles.toolbarRight}>
+          {isEditMode && ghostId && (
+            <IconButton
+              icon="delete-outline"
+              iconColor={colors.error}
+              size={22}
+              onPress={() => setShowDeleteDialog(true)}
+              disabled={isSaving}
+              accessibilityLabel="Supprimer le post"
+            />
+          )}
+          {isEditMode && (
+            <IconButton
+              icon="refresh"
+              iconColor={colors.onSurfaceVariant}
+              size={22}
+              onPress={onPressReset}
+              accessibilityLabel="Annuler les modifications"
+            />
+          )}
+        </View>
       </View>
       <Divider />
 
@@ -212,6 +244,23 @@ export default function ComposeScreen(): React.JSX.Element {
         )}
       </View>
 
+      <Portal>
+        <Dialog visible={showDeleteDialog} onDismiss={() => setShowDeleteDialog(false)}>
+          <Dialog.Title>Supprimer le post</Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium">
+              Supprimer « {title || '(Sans titre)'} » définitivement ?
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowDeleteDialog(false)}>Annuler</Button>
+            <Button textColor={colors.error} onPress={handleConfirmDelete}>
+              Supprimer
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
       <Snackbar
         visible={!!error && !snackbarMessage}
         onDismiss={clearError}
@@ -257,6 +306,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   toolbarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  toolbarRight: {
     flexDirection: 'row',
     alignItems: 'center',
   },

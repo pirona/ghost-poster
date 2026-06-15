@@ -207,10 +207,12 @@ export async function uploadImage(localUri: string): Promise<string> {
   formData.append('file', { uri: localUri, name: filename, type } as unknown as Blob);
   formData.append('purpose', 'image');
 
+  // Ne pas forcer Content-Type — React Native XMLHttpRequest ajoute le boundary automatiquement.
+  // Avec Axios 1.x + Hermes, forcer 'multipart/form-data' sans boundary fait échouer le parse côté serveur.
   const response = await client.post<GhostImageUploadResponse>(
     '/ghost/api/admin/images/upload/',
     formData,
-    { headers: { 'Content-Type': 'multipart/form-data' } },
+    { headers: { 'Content-Type': undefined } },
   );
   return response.data.images[0].url;
 }

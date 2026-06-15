@@ -1,11 +1,4 @@
-/**
- * @file src/hooks/useImageUpload.ts
- * @description Hook gérant le flux complet d'ajout d'image :
- *              demande de permission → sélection galerie → upload Ghost → insertion Markdown.
- *
- * @exports useImageUpload
- */
-
+// SPDX-License-Identifier: GPL-3.0-or-later
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,45 +8,34 @@ import { uploadImage } from '../api/ghostClient';
 
 const MAX_WIDTH = 1920;
 
-// ---------------------------------------------------------------------------
-// Hook
-// ---------------------------------------------------------------------------
-
-/**
- * Fournit un état d'upload et une fonction pour déclencher la sélection + l'upload.
- */
 export function useImageUpload() {
   const [isUploading, setIsUploading] = useState(false);
 
-  /**
-   * Demande la permission d'accès à la galerie, ouvre le sélecteur,
-   * uploade l'image sélectionnée vers Ghost, puis appelle onInsert
-   * avec la syntaxe Markdown `![](url)`.
-   *
-   * Le bouton déclencheur est désactivé pendant l'upload pour éviter les doublons.
-   *
-   * @param onInsert - Callback recevant la syntaxe Markdown à insérer dans l'éditeur
-   */
   async function pickAndUpload(onInsert: (markdown: string) => void): Promise<void> {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
+      console.warn('[ImageUpload] Permission galerie refusée');
       Alert.alert(
         'Permission refusée',
-        'L\'accès à la galerie est nécessaire pour insérer des images dans vos articles.',
+        "L'accès à la galerie est nécessaire pour insérer des images dans vos articles.",
       );
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.85,
+      mediaTypes: 'images',
+      quality: 1,
       allowsEditing: false,
       allowsMultipleSelection: false,
     });
 
-    if (result.canceled || !result.assets[0]) return;
+    if (result.canceled || !result.assets[0]) {
+      console.log('[ImageUpload] Sélection annulée');
+      return;
+    }
 
     const { uri, width } = result.assets[0];
+    console.log('[ImageUpload] Image sélectionnée — uri:', uri, 'width:', width);
     setIsUploading(true);
 
     try {
@@ -65,13 +47,15 @@ export function useImageUpload() {
         actions,
         { compress: 0.85, format: ImageManipulator.SaveFormat.JPEG },
       );
+      console.log('[ImageUpload] Après redimensionnement:', manipulated.uri);
 
       const imageUrl = await uploadImage(manipulated.uri);
+      console.log('[ImageUpload] Upload réussi:', imageUrl);
       onInsert(`\n![](${imageUrl})`);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Impossible d\'uploader l\'image.';
-      console.error('Erreur upload image:', message);
-      Alert.alert('Échec de l\'upload', message);
+      const message = err instanceof Error ? err.message : "Impossible d'uploader l'image.";
+      console.error('[ImageUpload] Erreur:', err);
+      Alert.alert("Échec de l'upload", message);
     } finally {
       setIsUploading(false);
     }
