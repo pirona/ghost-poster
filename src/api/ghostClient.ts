@@ -212,7 +212,9 @@ export async function uploadImage(localUri: string): Promise<string> {
   const response = await client.post<GhostImageUploadResponse>(
     '/ghost/api/admin/images/upload/',
     formData,
-    { headers: { 'Content-Type': undefined } },
+    // null supprime explicitement le Content-Type par défaut (application/json)
+    // pour laisser React Native XHR injecter le boundary multipart automatiquement.
+    { headers: { 'Content-Type': null } },
   );
   return response.data.images[0].url;
 }

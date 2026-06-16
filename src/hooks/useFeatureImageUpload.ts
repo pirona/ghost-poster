@@ -13,35 +13,35 @@ export function useFeatureImageUpload() {
   const [isUploading, setIsUploading] = useState(false);
 
   async function pickAndUpload(onUploaded: (url: string) => void): Promise<void> {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      console.warn('[FeatureImageUpload] Permission galerie refusée');
-      Alert.alert(
-        'Permission refusée',
-        "L'accès à la galerie est nécessaire pour choisir une image à la une.",
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      allowsEditing: false,
-      allowsMultipleSelection: false,
-      quality: 1,
-    });
-
-    if (result.canceled || !result.assets[0]) {
-      console.log('[FeatureImageUpload] Sélection annulée');
-      return;
-    }
-
-    const { uri, width } = result.assets[0];
-    console.log('[FeatureImageUpload] Image sélectionnée — uri:', uri, 'width:', width);
     setIsUploading(true);
-
     try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        console.warn('[FeatureImageUpload] Permission galerie refusée');
+        Alert.alert(
+          'Permission refusée',
+          "L'accès à la galerie est nécessaire pour choisir une image à la une.",
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images',
+        allowsEditing: false,
+        allowsMultipleSelection: false,
+        quality: 1,
+      });
+
+      if (result.canceled || !result.assets[0]) {
+        console.log('[FeatureImageUpload] Sélection annulée');
+        return;
+      }
+
+      const { uri, width } = result.assets[0];
+      console.log('[FeatureImageUpload] Image sélectionnée — uri:', uri, 'width:', width);
+
       const actions: ImageManipulator.Action[] =
-        width > MAX_WIDTH ? [{ resize: { width: MAX_WIDTH } }] : [];
+        width && width > MAX_WIDTH ? [{ resize: { width: MAX_WIDTH } }] : [];
 
       const manipulated = await ImageManipulator.manipulateAsync(
         uri,

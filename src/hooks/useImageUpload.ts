@@ -12,33 +12,33 @@ export function useImageUpload() {
   const [isUploading, setIsUploading] = useState(false);
 
   async function pickAndUpload(onInsert: (markdown: string) => void): Promise<void> {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      console.warn('[ImageUpload] Permission galerie refusée');
-      Alert.alert(
-        'Permission refusée',
-        "L'accès à la galerie est nécessaire pour insérer des images dans vos articles.",
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      quality: 1,
-      allowsEditing: false,
-      allowsMultipleSelection: false,
-    });
-
-    if (result.canceled || !result.assets[0]) {
-      console.log('[ImageUpload] Sélection annulée');
-      return;
-    }
-
-    const { uri, width } = result.assets[0];
-    console.log('[ImageUpload] Image sélectionnée — uri:', uri, 'width:', width);
     setIsUploading(true);
-
     try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        console.warn('[ImageUpload] Permission galerie refusée');
+        Alert.alert(
+          'Permission refusée',
+          "L'accès à la galerie est nécessaire pour insérer des images dans vos articles.",
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: 'images',
+        quality: 1,
+        allowsEditing: false,
+        allowsMultipleSelection: false,
+      });
+
+      if (result.canceled || !result.assets[0]) {
+        console.log('[ImageUpload] Sélection annulée');
+        return;
+      }
+
+      const { uri, width } = result.assets[0];
+      console.log('[ImageUpload] Image sélectionnée — uri:', uri, 'width:', width);
+
       const actions: ImageManipulator.Action[] =
         width && width > MAX_WIDTH ? [{ resize: { width: MAX_WIDTH } }] : [];
 
