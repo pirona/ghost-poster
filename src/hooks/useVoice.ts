@@ -4,6 +4,7 @@ import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
 } from 'expo-speech-recognition';
+import { getLocales } from 'expo-localization';
 
 export type VoiceState = 'idle' | 'listening' | 'processing' | 'error';
 
@@ -29,7 +30,7 @@ export function useVoice() {
     setState('error');
   });
 
-  const start = useCallback(async (lang = 'fr-FR') => {
+  const start = useCallback(async () => {
     setError(null);
     setTranscript('');
     const { granted } = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
@@ -38,6 +39,7 @@ export function useVoice() {
       setState('error');
       return;
     }
+    const lang = getLocales()[0]?.languageTag ?? 'fr-FR';
     ExpoSpeechRecognitionModule.start({ lang, interimResults: true });
   }, []);
 

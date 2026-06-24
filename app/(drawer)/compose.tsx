@@ -109,7 +109,7 @@ export default function ComposeScreen(): React.JSX.Element {
     }
     voicePrevLengthRef.current = 0;
     resetVoice();
-    startVoice('fr-FR');
+    startVoice();
   }
 
   function handleTitleChange(value: string): void {

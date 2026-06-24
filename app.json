@@ -36,7 +36,8 @@
         {
           "microphonePermission": "Accès au microphone pour la dictée vocale."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "web": {
       "bundler": "metro"
