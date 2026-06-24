@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate ghost-poster app icons (icon.png and adaptive-icon.png)
+Generate Ghostposter app icons (icon.png and adaptive-icon.png)
 from the official Ghost favicon SVG.
 
 Requirements: ImageMagick (magick), Pillow (PIL)

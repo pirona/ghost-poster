@@ -59,7 +59,7 @@ function DrawerContent(props: DrawerContentComponentProps): React.JSX.Element {
             resizeMode="contain"
           />
           <Text variant="titleLarge" style={[styles.appName, { color: colors.onSurface }]}>
-            Ghost Poster
+            Ghostposter
           </Text>
         </View>
         {activeInstance && (

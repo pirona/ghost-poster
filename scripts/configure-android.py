@@ -3,7 +3,7 @@
 Patch android/ after expo prebuild:
   - Ajoute la release signingConfig dans build.gradle
   - Remplace le signingConfig debug par release pour le buildType release
-  - Nomme l'APK ghost-poster-<version>.apk
+  - Nomme l'APK ghostposter-<version>.apk
   - Injecte les props de signature dans gradle.properties
   - Corrige les JVM args pour JDK 21
 
@@ -109,7 +109,7 @@ if "outputFileName" not in content:
         f'    applicationVariants.all {{ variant ->\n'
         f'        variant.outputs.all {{\n'
         f'            if (variant.buildType.name == "release") {{\n'
-        f'                outputFileName = "ghost-poster-{version}.apk"\n'
+        f'                outputFileName = "ghostposter-{version}.apk"\n'
         f'            }}\n'
         f'        }}\n'
         f'    }}\n'
@@ -120,7 +120,7 @@ if "outputFileName" not in content:
         "\n}\n\n// Apply static values",
         f"\n    {naming.rstrip()}\n}}\n\n// Apply static values",
     )
-    print(f'  APK nommé ghost-poster-{version}.apk')
+    print(f'  APK nommé ghostposter-{version}.apk')
 
 BUILD_GRADLE.write_text(content)
 print(f"✓ Android configuré pour v{version}")
