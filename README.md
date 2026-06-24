@@ -47,7 +47,7 @@ npm install
 npx expo run:android   # requires Android Studio or a connected device
 ```
 
-To build a signed release APK or publish a new version, see [`docs/BUILD_LOCAL.md`](docs/BUILD_LOCAL.md) and [`docs/RELEASE.md`](docs/RELEASE.md).
+To build a signed release APK or publish a new version, see the [Build Local](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Build-Local) and [Release](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Release) wiki pages.
 
 ---
 
@@ -67,14 +67,16 @@ The tool amplifies. It doesn't invent what you don't already know how to think.
 
 ## Documentation
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — architecture, data flow, application layers
-- [`docs/SETUP.md`](docs/SETUP.md) — installation and Ghost configuration guide
-- [`docs/BUILD_LOCAL.md`](docs/BUILD_LOCAL.md) — local build environment and procedure
-- [`docs/RELEASE.md`](docs/RELEASE.md) — release process (versioning + GitHub Actions)
-- [`docs/GHOST_API.md`](docs/GHOST_API.md) — Ghost API reference, error handling
-- [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — guide to extending the app
-- [`docs/SECURITY.md`](docs/SECURITY.md) — credential storage, JWT, network constraints
-- [`docs/REVERSE_PROXY.md`](docs/REVERSE_PROXY.md) — reverse proxy configuration (HAProxy, Nginx, Caddy, offsite VPS)
+Full documentation is in the [project wiki](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki).
+
+- [Architecture](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Architecture) — data flow, application layers
+- [Setup](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Setup) — installation and Ghost configuration
+- [Build Local](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Build-Local) — local build environment and procedure
+- [Release](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Release) — release process (versioning + GitHub Actions)
+- [Ghost API](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Ghost-API) — API reference, error handling
+- [Contributing](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Contributing) — guide to extending the app
+- [Security](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Security) — credential storage, JWT, network constraints
+- [Reverse Proxy](https://homegit.gyozamancave.fr/billisdead/ghost-poster/wiki/Reverse-Proxy) — HAProxy, Nginx, Caddy, offsite VPS
 
 ---
 
