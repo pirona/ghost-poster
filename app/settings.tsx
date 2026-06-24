@@ -233,7 +233,7 @@ export default function SettingsScreen(): React.JSX.Element {
 
       <FAB
         icon="plus"
-        iconColor={colors.surface}
+        color={colors.surface}
         style={[styles.fab, { backgroundColor: colors.primary }]}
         onPress={openModal}
       />
