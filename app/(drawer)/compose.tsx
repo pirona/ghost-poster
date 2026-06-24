@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -24,6 +24,7 @@ import { useRouter } from 'expo-router';
 
 import { usePostStore } from '../../src/store/postStore';
 import { usePostEditor } from '../../src/hooks/usePostEditor';
+import { useVoice } from '../../src/hooks/useVoice';
 import { TagChipList } from '../../src/components/TagChipList';
 import { MarkdownPreview } from '../../src/components/MarkdownPreview';
 import { ImagePickerButton } from '../../src/components/ImagePickerButton';
@@ -46,15 +47,70 @@ export default function ComposeScreen(): React.JSX.Element {
 
   const { colors } = useTheme();
 
+  const { state: voiceState, transcript, error: voiceError, start: startVoice, stop: stopVoice, reset: resetVoice } = useVoice();
+
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [titleError, setTitleError] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+  // Cursor tracking for voice insertion
+  const selectionRef = useRef({ start: 0, end: 0 });
+  // Position in content where the current voice session started
+  const voiceAnchorRef = useRef<number | null>(null);
+  // Length of text inserted so far by the current voice interim result
+  const voicePrevLengthRef = useRef(0);
+  // Always-current content for use in async voice callbacks
+  const contentRef = useRef(content);
+  useEffect(() => { contentRef.current = content; }, [content]);
+
   const title = currentPost?.title ?? '';
   const content = currentPost?.markdownContent ?? '';
   const tags = currentPost?.tags ?? [];
   const ghostId = currentPost?.ghostId;
+
+  // Insert/replace voice transcript at the anchor position as interim results arrive
+  useEffect(() => {
+    if (!transcript || voiceAnchorRef.current === null) return;
+    const anchor = voiceAnchorRef.current;
+    const current = contentRef.current;
+    const prefix = current.slice(0, anchor);
+    const suffix = current.slice(anchor + voicePrevLengthRef.current);
+    setMarkdownContent(prefix + transcript + suffix);
+    voicePrevLengthRef.current = transcript.length;
+  }, [transcript, setMarkdownContent]);
+
+  // When voice session ends, finalize: reset anchor
+  useEffect(() => {
+    if ((voiceState === 'idle' || voiceState === 'error') && voiceAnchorRef.current !== null) {
+      voiceAnchorRef.current = null;
+      voicePrevLengthRef.current = 0;
+    }
+    if (voiceState === 'error' && voiceError) {
+      setSnackbarMessage(voiceError);
+      resetVoice();
+    }
+  }, [voiceState, voiceError, resetVoice]);
+
+  function handleMicPress(): void {
+    if (voiceState === 'listening' || voiceState === 'processing') {
+      stopVoice();
+      return;
+    }
+    const pos = selectionRef.current.start;
+    const current = contentRef.current;
+    // Insert a space separator if the cursor is not already after whitespace
+    const needsSpace = pos > 0 && !/\s/.test(current[pos - 1] ?? '');
+    if (needsSpace) {
+      setMarkdownContent(current.slice(0, pos) + ' ' + current.slice(pos));
+      voiceAnchorRef.current = pos + 1;
+    } else {
+      voiceAnchorRef.current = pos;
+    }
+    voicePrevLengthRef.current = 0;
+    resetVoice();
+    startVoice('fr-FR');
+  }
 
   function handleTitleChange(value: string): void {
     setTitle(value);
@@ -149,6 +205,14 @@ export default function ComposeScreen(): React.JSX.Element {
             accessibilityLabel={isPreviewMode ? 'Passer en mode édition' : 'Aperçu'}
           />
           <ImagePickerButton onInsert={handleImageInsert} disabled={isSaving} />
+          <IconButton
+            icon={voiceState === 'listening' ? 'microphone-off' : 'microphone'}
+            iconColor={voiceState === 'listening' ? colors.primary : voiceState === 'error' ? colors.error : colors.onSurfaceVariant}
+            size={22}
+            onPress={handleMicPress}
+            disabled={isSaving || isPreviewMode}
+            accessibilityLabel={voiceState === 'listening' ? 'Arrêter la dictée' : 'Dicter du contenu'}
+          />
         </View>
         <View style={styles.toolbarRight}>
           {isEditMode && ghostId && (
@@ -209,6 +273,7 @@ export default function ComposeScreen(): React.JSX.Element {
             label="Contenu (Markdown)"
             value={content}
             onChangeText={setMarkdownContent}
+            onSelectionChange={(e) => { selectionRef.current = e.nativeEvent.selection; }}
             mode="outlined"
             multiline
             scrollEnabled

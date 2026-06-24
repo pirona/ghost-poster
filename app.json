@@ -30,7 +30,13 @@
         }
       ],
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Accès au microphone pour la dictée vocale."
+        }
+      ]
     ],
     "web": {
       "bundler": "metro"
