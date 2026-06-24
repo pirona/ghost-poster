@@ -88,8 +88,9 @@ export function MarkdownPreview({ markdown }: MarkdownPreviewProps): React.JSX.E
     <View style={styles.container}>
       <WebView
         source={htmlSource}
-        originWhitelist={['*']}
+        originWhitelist={['about:*']}
         javaScriptEnabled={false}
+        onShouldStartLoadWithRequest={(req) => req.url.startsWith('about:')}
         scrollEnabled
         style={styles.webview}
       />
