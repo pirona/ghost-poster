@@ -34,7 +34,7 @@ API keys are stored in the Android Keystore — never in plaintext, never in log
 
 ## Stack
 
-React Native · React Native Paper · Zustand · Axios · `@noble/hashes` · `expo-secure-store` · turndown · marked · TypeScript strict
+React Native · React Native Paper · Zustand · Axios · `@noble/hashes` · `expo-secure-store` · marked · TypeScript strict
 
 ---
 

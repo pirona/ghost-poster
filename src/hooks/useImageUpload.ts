@@ -32,12 +32,10 @@ export function useImageUpload() {
       });
 
       if (result.canceled || !result.assets[0]) {
-        console.log('[ImageUpload] Sélection annulée');
         return;
       }
 
       const { uri, width } = result.assets[0];
-      console.log('[ImageUpload] Image sélectionnée — uri:', uri, 'width:', width);
 
       const actions: ImageManipulator.Action[] =
         width && width > MAX_WIDTH ? [{ resize: { width: MAX_WIDTH } }] : [];
@@ -47,10 +45,8 @@ export function useImageUpload() {
         actions,
         { compress: 0.85, format: ImageManipulator.SaveFormat.JPEG },
       );
-      console.log('[ImageUpload] Après redimensionnement:', manipulated.uri);
 
       const imageUrl = await uploadImage(manipulated.uri);
-      console.log('[ImageUpload] Upload réussi:', imageUrl);
       onInsert(`\n![](${imageUrl})`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Impossible d'uploader l'image.";

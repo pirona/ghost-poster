@@ -33,12 +33,10 @@ export function useFeatureImageUpload() {
       });
 
       if (result.canceled || !result.assets[0]) {
-        console.log('[FeatureImageUpload] Sélection annulée');
         return;
       }
 
       const { uri, width } = result.assets[0];
-      console.log('[FeatureImageUpload] Image sélectionnée — uri:', uri, 'width:', width);
 
       const actions: ImageManipulator.Action[] =
         width && width > MAX_WIDTH ? [{ resize: { width: MAX_WIDTH } }] : [];
@@ -48,10 +46,8 @@ export function useFeatureImageUpload() {
         actions,
         { compress: JPEG_QUALITY, format: ImageManipulator.SaveFormat.JPEG },
       );
-      console.log('[FeatureImageUpload] Après redimensionnement:', manipulated.uri);
 
       const imageUrl = await uploadImage(manipulated.uri);
-      console.log('[FeatureImageUpload] Upload réussi:', imageUrl);
       onUploaded(imageUrl);
     } catch (err) {
       console.error('[FeatureImageUpload] Erreur:', err);

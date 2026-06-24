@@ -90,7 +90,18 @@ export const useInstanceStore = create<InstanceState & InstanceActions>((set, ge
       const instancesJson = await getSecureItem('GHOST_INSTANCES');
       const activeId = await getSecureItem('GHOST_ACTIVE_ID');
 
-      const instances: GhostInstance[] = instancesJson ? JSON.parse(instancesJson) : [];
+      const parsed: unknown = instancesJson ? JSON.parse(instancesJson) : [];
+      const instances: GhostInstance[] = Array.isArray(parsed)
+        ? (parsed as Array<unknown>).filter(
+            (i): i is GhostInstance =>
+              typeof i === 'object' &&
+              i !== null &&
+              typeof (i as GhostInstance).id === 'string' &&
+              typeof (i as GhostInstance).name === 'string' &&
+              typeof (i as GhostInstance).url === 'string' &&
+              typeof (i as GhostInstance).apiKey === 'string',
+          )
+        : [];
       // Vérifie que l'instance active existe toujours dans la liste
       const validActiveId =
         activeId && instances.some((i) => i.id === activeId) ? activeId : null;

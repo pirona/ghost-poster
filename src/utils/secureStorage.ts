@@ -25,9 +25,13 @@ type SecureKey = 'GHOST_INSTANCES' | 'GHOST_ACTIVE_ID';
  * @returns La valeur stockée, ou null si absente
  * @throws Error si la lecture échoue (permission, corruption)
  */
+const SECURE_OPTS: SecureStore.SecureStoreOptions = {
+  keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+};
+
 export async function getSecureItem(key: SecureKey): Promise<string | null> {
   try {
-    return await SecureStore.getItemAsync(key);
+    return await SecureStore.getItemAsync(key, SECURE_OPTS);
   } catch (error) {
     throw new Error(
       `Erreur de lecture SecureStore (${key}): ${error instanceof Error ? error.message : String(error)}`,
@@ -43,7 +47,7 @@ export async function getSecureItem(key: SecureKey): Promise<string | null> {
  */
 export async function setSecureItem(key: SecureKey, value: string): Promise<void> {
   try {
-    await SecureStore.setItemAsync(key, value);
+    await SecureStore.setItemAsync(key, value, SECURE_OPTS);
   } catch (error) {
     throw new Error(
       `Erreur d'écriture SecureStore (${key}): ${error instanceof Error ? error.message : String(error)}`,
@@ -58,7 +62,7 @@ export async function setSecureItem(key: SecureKey, value: string): Promise<void
  */
 export async function deleteSecureItem(key: SecureKey): Promise<void> {
   try {
-    await SecureStore.deleteItemAsync(key);
+    await SecureStore.deleteItemAsync(key, SECURE_OPTS);
   } catch (error) {
     throw new Error(
       `Erreur de suppression SecureStore (${key}): ${error instanceof Error ? error.message : String(error)}`,

@@ -262,21 +262,12 @@ export default function ComposeScreen(): React.JSX.Element {
       </Portal>
 
       <Snackbar
-        visible={!!error && !snackbarMessage}
-        onDismiss={clearError}
-        duration={4000}
-        action={{ label: 'OK', onPress: clearError }}
+        visible={!!error || !!snackbarMessage}
+        onDismiss={() => { if (error) clearError(); else setSnackbarMessage(null); }}
+        duration={error ? 4000 : 3500}
+        action={{ label: 'OK', onPress: () => { if (error) clearError(); else setSnackbarMessage(null); } }}
       >
-        {error}
-      </Snackbar>
-
-      <Snackbar
-        visible={!!snackbarMessage}
-        onDismiss={() => setSnackbarMessage(null)}
-        duration={3500}
-        action={{ label: 'OK', onPress: () => setSnackbarMessage(null) }}
-      >
-        {snackbarMessage}
+        {error ?? snackbarMessage}
       </Snackbar>
     </KeyboardAvoidingView>
   );

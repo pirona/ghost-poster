@@ -34,7 +34,7 @@ function hexToUint8Array(hex: string): Uint8Array {
 }
 
 /** Encode un objet JSON ou des bytes en base64url sans dépendance btoa. */
-function base64url(input: object | Uint8Array): string {
+function base64url(input: Record<string, unknown> | Uint8Array): string {
   const bytes =
     input instanceof Uint8Array
       ? input
