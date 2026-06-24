@@ -47,7 +47,7 @@ npm install
 npx expo run:android   # requires Android Studio or a connected device
 ```
 
-To build a signed release APK or publish a new version, see the [Build Local](https://github.com/billisdead/ghost-poster/wiki/Build-Local) and [Release](https://github.com/billisdead/ghost-poster/wiki/Release) wiki pages.
+To build a signed release APK or publish a new version, see the [Build Local](https://github.com/pirona/ghost-poster/wiki/Build-Local) and [Release](https://github.com/pirona/ghost-poster/wiki/Release) wiki pages.
 
 ---
 
@@ -67,16 +67,16 @@ The tool amplifies. It doesn't invent what you don't already know how to think.
 
 ## Documentation
 
-Full documentation is in the [project wiki](https://github.com/billisdead/ghost-poster/wiki).
+Full documentation is in the [project wiki](https://github.com/pirona/ghost-poster/wiki).
 
-- [Architecture](https://github.com/billisdead/ghost-poster/wiki/Architecture) — data flow, application layers
-- [Setup](https://github.com/billisdead/ghost-poster/wiki/Setup) — installation and Ghost configuration
-- [Build Local](https://github.com/billisdead/ghost-poster/wiki/Build-Local) — local build environment and procedure
-- [Release](https://github.com/billisdead/ghost-poster/wiki/Release) — release process (versioning + GitHub Actions)
-- [Ghost API](https://github.com/billisdead/ghost-poster/wiki/Ghost-API) — API reference, error handling
-- [Contributing](https://github.com/billisdead/ghost-poster/wiki/Contributing) — guide to extending the app
-- [Security](https://github.com/billisdead/ghost-poster/wiki/Security) — credential storage, JWT, network constraints
-- [Reverse Proxy](https://github.com/billisdead/ghost-poster/wiki/Reverse-Proxy) — HAProxy, Nginx, Caddy, offsite VPS
+- [Architecture](https://github.com/pirona/ghost-poster/wiki/Architecture) — data flow, application layers
+- [Setup](https://github.com/pirona/ghost-poster/wiki/Setup) — installation and Ghost configuration
+- [Build Local](https://github.com/pirona/ghost-poster/wiki/Build-Local) — local build environment and procedure
+- [Release](https://github.com/pirona/ghost-poster/wiki/Release) — release process (versioning + GitHub Actions)
+- [Ghost API](https://github.com/pirona/ghost-poster/wiki/Ghost-API) — API reference, error handling
+- [Contributing](https://github.com/pirona/ghost-poster/wiki/Contributing) — guide to extending the app
+- [Security](https://github.com/pirona/ghost-poster/wiki/Security) — credential storage, JWT, network constraints
+- [Reverse Proxy](https://github.com/pirona/ghost-poster/wiki/Reverse-Proxy) — HAProxy, Nginx, Caddy, offsite VPS
 
 ---
 

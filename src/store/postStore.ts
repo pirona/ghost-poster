@@ -276,9 +276,6 @@ export const usePostStore = create<PostState & PostActions>((set, get) => ({
         },
       });
 
-      // Rafraîchit la liste
-      await get().fetchPosts(true);
-
       return savedPost;
     } catch (error) {
       const message = error instanceof ConflictError

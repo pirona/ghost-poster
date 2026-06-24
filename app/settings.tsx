@@ -232,11 +232,8 @@ export default function SettingsScreen(): React.JSX.Element {
       </ScrollView>
 
       <FAB
-        icon={({ size, color }) => (
-          <Text style={{ fontSize: size + 4, color, fontWeight: '900', textAlign: 'center', lineHeight: size + 4, includeFontPadding: false }}>
-            +
-          </Text>
-        )}
+        icon="plus"
+        iconColor={colors.surface}
         style={[styles.fab, { backgroundColor: colors.primary }]}
         onPress={openModal}
       />

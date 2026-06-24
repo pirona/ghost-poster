@@ -68,21 +68,39 @@ export function htmlToMarkdown(html: string | null | undefined): string {
     return text.split('\n').map((l: string) => `> ${l.trim()}`).join('\n') + '\n\n';
   });
 
-  // Ordered lists — numbered items (must be processed before stripping UL/OL containers)
-  s = s.replace(/<ol[^>]*>([\s\S]*?)<\/ol>/gi, (_, inner) => {
-    let n = 0;
-    const items = inner.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, li: string) => {
-      n++;
-      return `${n}. ${li.replace(/<[^>]+>/g, '').trim()}\n`;
-    });
-    return '\n' + items + '\n';
-  });
-
-  // Unordered lists — remaining LI (inside UL)
-  s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, inner) =>
-    `- ${inner.replace(/<[^>]+>/g, '').trim()}\n`
-  );
-  s = s.replace(/<\/?(ul|ol)[^>]*>/gi, '\n');
+  // Lists — iterative innermost-first to support nesting up to ~3 levels.
+  // Each pass converts lists that contain no nested <ul>/<ol>.
+  // The first line gets the bullet/number; continuation lines get 2-space indent.
+  {
+    let prev: string;
+    let pass = 0;
+    do {
+      prev = s;
+      s = s.replace(
+        /<(ul|ol)[^>]*>((?:(?!<(?:ul|ol)\b)[\s\S])*?)<\/\1>/gi,
+        (_match: string, tag: string, inner: string) => {
+          let n = 0;
+          const items = inner.replace(
+            /<li[^>]*>([\s\S]*?)<\/li>/gi,
+            (_li: string, content: string) => {
+              const stripped = content.replace(/<[^>]+>/g, '').trim();
+              if (!stripped) return '';
+              const lines = stripped.split('\n').filter((l: string) => l.trim());
+              const bullet = tag.toLowerCase() === 'ol' ? `${++n}.` : '-';
+              const rest = lines.slice(1).map((l: string) => `  ${l.trim()}`);
+              return [bullet + ' ' + lines[0], ...rest].join('\n') + '\n';
+            },
+          );
+          return '\n' + items + '\n';
+        },
+      );
+      pass++;
+    } while (s !== prev && pass < 6);
+    s = s.replace(/<\/?(ul|ol)[^>]*>/gi, '\n');
+    s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_: string, inner: string) =>
+      `- ${inner.replace(/<[^>]+>/g, '').trim()}\n`,
+    );
+  }
 
   // Horizontal rule
   s = s.replace(/<hr[^>]*>/gi, '\n---\n\n');

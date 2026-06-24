@@ -117,6 +117,12 @@ export function useInstances() {
       const status = axios.isAxiosError(err) ? err.response?.status : null;
       if (status === 401 || status === 403) {
         onError('apiKey', 'Clé API invalide ou accès refusé (401/403).');
+      } else if (status === 429) {
+        onError('url', 'Trop de tentatives — attendez quelques secondes avant de réessayer.');
+      } else if (status !== null && status >= 500) {
+        onError('url', `Erreur serveur Ghost (${status}). Vérifiez que l'instance est opérationnelle.`);
+      } else if (axios.isAxiosError(err) && !err.response) {
+        onError('url', `Impossible de joindre l'instance : ${err.message}`);
       } else {
         const message =
           err instanceof Error
