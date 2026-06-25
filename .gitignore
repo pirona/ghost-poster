@@ -37,3 +37,6 @@ android/
 # Logs
 *.log
 .secrets/
+
+# Blog drafts
+blog-post-*.md
