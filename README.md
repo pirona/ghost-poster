@@ -12,6 +12,10 @@ Write posts in Markdown, preview them, upload images, manage drafts and publishe
 
 **What it doesn't do:** manage members, newsletters, theme, or instance settings. This is a mobile publishing tool, not an embedded admin interface.
 
+→ **[Ko-fi](https://ko-fi.com/billisdead)**
+
+> Built on top of [Ghost CMS](https://github.com/TryGhost/Ghost) — Ghost belongs to its authors and the Ghost Foundation. Huge kudos to the developers and maintainers for building such an excellent open-source platform.
+
 ---
 
 ## Getting the app
@@ -85,8 +89,6 @@ Full documentation: [Gitea wiki](https://homegit.gyozamancave.fr/billisdead/ghos
 ## About
 
 **billisdead** — visual artist and graphic designer, image generation with Flux.1/ComfyUI → [billisdead.com](https://billisdead.com)
-
-→ **[Ko-fi](https://ko-fi.com/billisdead)**
 
 Not commercial software. A tool built for personal use, published in case it's useful to others.
 
